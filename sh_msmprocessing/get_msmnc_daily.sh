@@ -8,7 +8,7 @@ str_date="$2"
 
 url_target="${url_parent}/${str_year}/${str_date}.nc"
 
-dir_download="../ncfile_dayly/${str_year}"
+dir_download="../ncfile_daily/${str_year}"
 
 if [ ! -d $dir_download ]; then
     mkdir $dir_download

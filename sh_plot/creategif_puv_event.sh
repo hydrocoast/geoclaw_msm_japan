@@ -29,7 +29,7 @@ if [ ! -d $figdir ]; then echo "Not found: directory $figdir" ; exit 0; fi
 gifdir="_gif"
 if [ ! -d $gifdir ]; then mkdir $gifdir ; fi
 
-ffmpeg -i $figdir/MSM${figdir}S_%*.png -vf palettegen palette.png -y
-ffmpeg -r $fps -i $figdir/MSM${figdir}S_%*.png -i palette.png -filter_complex paletteuse  $gifdir/MSM${figdir}.gif -y
+ffmpeg -i $figdir/%*.png -vf palettegen palette.png -y
+ffmpeg -r $fps -i $figdir/%*.png -i palette.png -filter_complex paletteuse  $gifdir/${figdir}.gif -y
 \rm palette.png
 
