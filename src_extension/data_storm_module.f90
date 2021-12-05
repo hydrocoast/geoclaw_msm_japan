@@ -197,125 +197,101 @@ contains
 
     end subroutine set_storm
 
-    ! ==========================================================================
-    !  real(kind=8) pure date_to_seconds(year,months,days,hours,minutes,seconds)
-    !    Convert time from year, month, day, hour, min, sec to seconds since the
-    !    beginning of the year.
-    ! ==========================================================================
-    !pure real(kind=8) function date_to_seconds(year,months,days,hours,minutes, &
-                                               !seconds) result(time)
-    pure integer function date_to_seconds(year,months,days,hours,minutes) result(time)
-      
-        implicit none
-
-        ! Input
-        integer, intent(in) :: year, months, days, hours, minutes
-
-        ! Local storage
-        integer :: total_days
-
-        ! Count number of days
-        total_days = days
-
-        ! Add days for months that have already passed
-        if (months > 1) total_days = total_days + 31
-        if (months > 2) then
-            if (int(year / 4) * 4 == year) then
-                total_days = total_days + 29
-            else
-                total_days = total_days + 28
-            endif
-        endif
-        if (months > 3)  total_days = total_days + 30
-        if (months > 4)  total_days = total_days + 31
-        if (months > 5)  total_days = total_days + 30
-        if (months > 6)  total_days = total_days + 31
-        if (months > 7)  total_days = total_days + 30
-        if (months > 8)  total_days = total_days + 31
-        if (months > 9)  total_days = total_days + 30
-        if (months > 10) total_days = total_days + 31
-        if (months > 11) total_days = total_days + 30
-
-        ! Convert everything to seconds since the beginning of the year
-        time = (total_days - 1) * 86400 + hours * 3600 + minutes * 60
-
-    end function date_to_seconds
-
-    ! ==========================================================================
-    !  read_wrf_storm_data_file()
-    !    Opens storm data file and reads next storm entry
-    !    Currently only for ASCII file
-    !  This file will probably need to be modified
-    !   to suit the input dataset format.
-    ! ==========================================================================
-    subroutine read_wrf_storm_file(data_path,storm_array,num_lats,last_storm_index,timestamp)
-
+    subroutine read_msmnc(storm,t,data_path)
+        use netcdf
+        use geoclaw_module, only: ambient_pressure
         implicit none
 
         ! Subroutine I/O
-        real(kind=8), intent(inout) :: storm_array(:,:)
+        type(data_storm_type), intent(inout) :: storm
+        real(kind=8), intent(in) :: t
         character(len=*), intent(in) :: data_path
-        integer, intent(in) :: num_lats, last_storm_index
-        integer, intent(inout) :: timestamp
 
         ! Local storage
-        integer :: j, k, iostatus
-        integer :: yy, mm, dd, hh, nn
-        integer, parameter :: data_file = 701
+        real(kind=8) :: lowest_p
+        integer :: ncid, varid, dimid
+        integer :: start_nc(3), count_nc(3)
+        real(kind=8) :: scale_factor, add_offset
+      
+        ! dimension
+        integer :: nx, ny, nt
+        real(kind=8), allocatable :: lon(:), lat(:), timelap(:)
+        real(kind=8), allocatable :: psea(:,:,:)
+        real(kind=8), allocatable :: u10(:,:,:), v10(:,:,:)
 
-        ! Open the input file
-        !
-        open(unit=data_file,file=data_path,status='old', &
-                action='read',iostat=iostatus)
-        if (iostatus /= 0) then
-            print *, "Error opening data file: ",trim(data_path)
-            print *, "Status = ", iostatus
-            stop 
-        endif            
-        ! Advance to the next time step to be read in
-        ! Skip entries based on total number previously read
-        do k = 1, last_storm_index
-            do j = 1, num_lats + 1
-                read(data_file, *, iostat=iostatus)
-                ! Exit loop if we ran into an error or we reached the end of the file
-                if (iostatus /= 0) then
-                    print *, "Unexpected end-of-file reading ",trim(data_path)
-                    print *, "Status = ", iostatus
-                    if (DEBUG) print *, "k, laststormindex = ", k, last_storm_index
-                    if (DEBUG) print *, "j, num_lats = ", j, num_lats
-                    timestamp = -1
-                    close(data_file) 
-                    return
-                endif
-            enddo
-        enddo
-        ! Read in next time snapshot 
-        ! example:
-        ! ____108000 7908251800 (EDIT from here)
-        read(data_file, 600, iostat=iostatus) & 
-            yy, mm, dd, hh, nn
-    600 FORMAT(11x,i2,i2,i2,i2,i2)
-        !read(data_file, (11x,i2,i2,i2,i2,i2), iostat=iostatus) & 
-            !yy, mm, dd, hh, nn
-        do j = 1, num_lats
-            read(data_file, *, iostat=iostatus) storm_array(:,j) 
-            ! Exit loop if we ran into an error or we reached the end of the file
-            if (iostatus /= 0) then
-                print *, "Unexpected end-of-file reading ",trim(data_path)
-                print *, "Status = ", iostatus
-                if (DEBUG) print *, "j, num_lats = ", j, num_lats
-                timestamp = -1
-                close(data_file) 
-                return
-            endif
-        enddo
+        ! open
+        !call check_ncstatus( nf90_open( trim( f_in ), nf90_nowrite, ncid) )
+        call check_ncstatus( nf90_open( trim( data_path ), nf90_nowrite, ncid) )
 
-        ! Convert datetime to seconds
-        timestamp = date_to_seconds(yy,mm,dd,hh,nn)
-        close(data_file) 
+        ! number of array
+        ! -- lon
+        call check_ncstatus( nf90_inq_dimid(ncid, 'lon', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=nx) )
+        allocate(lon(nx))
+        call check_ncstatus( nf90_get_var(ncid, dimid, lon) )
+        ! -- lat
+        call check_ncstatus( nf90_inq_dimid(ncid, 'lat', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=ny) )
+        allocate(lat(ny))
+        call check_ncstatus( nf90_get_var(ncid, dimid, lat) )
+        ! -- timelap
+        call check_ncstatus( nf90_inq_dimid(ncid, 'time', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=nt) )
+        allocate(timelap(nt))
+        call check_ncstatus( nf90_get_var(ncid, dimid, timelap) )
+      
+        ! allocate
+        allocate(psea(nx,ny,nt))
+        allocate(u10(nx,ny,nt), v10(nx,ny,nt))
+      
+        ! indices
+        start_nc = [1,1,1]
+        count_nc = [nx,ny,nt]
+      
+        ! read variables
+        ! -- psea
+        call check_ncstatus( nf90_inq_varid(ncid, "psea", varid) )
+        call check_ncstatus( nf90_get_var(ncid, varid, psea, start=start_nc, count=count_nc) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "scale_factor", scale_factor) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "add_offset", add_offset) )
+        psea(:,:,:) = psea(:,:,:)*scale_factor + add_offset
+        ! -- u10
+        call check_ncstatus( nf90_inq_varid(ncid, "u", varid) )
+        call check_ncstatus( nf90_get_var(ncid, varid, u10, start=start_nc, count=count_nc) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "scale_factor", scale_factor) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "add_offset", add_offset) )
+        u10(:,:,:) = u10(:,:,:)*scale_factor + add_offset
+        ! -- v10
+        call check_ncstatus( nf90_inq_varid(ncid, "v", varid) )
+        call check_ncstatus( nf90_get_var(ncid, varid, v10, start=start_nc, count=count_nc) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "scale_factor", scale_factor) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "add_offset", add_offset) )
+        v10(:,:,:) = v10(:,:,:)*scale_factor + add_offset
+      
+        ! close nc file
+        call check_ncstatus( nf90_close(ncid) )
 
-    end subroutine read_wrf_storm_file
-   
+      
+        ! Overwrite older storm states with newer storm states
+        storm%t_prev = storm%t_next
+        storm%u_prev = storm%u_next 
+        storm%v_prev = storm%v_next 
+        storm%p_prev = storm%p_next 
+        storm%eye_prev = storm%eye_next
+
+        
+    end subroutine read_msmnc
+
+    ! ------------------------------------------------------------------------------
+    subroutine check_ncstatus( status )
+        integer, intent (in) :: status
+        if(status /= nf90_noerr) then 
+           print *, trim(nf90_strerror(status))
+           stop "Something went wrong while reading ncfile."
+        end if
+    end subroutine check_ncstatus
+    ! ------------------------------------------------------------------------------
+       
     ! ==========================================================================
     !  read_wrf_storm_data()
     !    Reads storm fields for next time snapshot
