@@ -30,7 +30,7 @@ NC_LINK_CMD = $(shell $(NF_CONFIG) --flibs)
 NC_LINK_CMD += $(shell $(NF_CONFIG) --cflags)
 
 ##
-SRC_EXT = ../src_extension
+SRC_EXT = .
 
 # Compiler flags
 MPFLAG = -fopenmp

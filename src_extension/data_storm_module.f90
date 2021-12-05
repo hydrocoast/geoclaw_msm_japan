@@ -90,7 +90,7 @@ contains
 
         ! Subroutine I/O
         character(len=*), optional :: storm_data_path
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
         integer, intent(in) :: storm_spec_type, log_unit
 
     ! Local storage
@@ -253,7 +253,7 @@ contains
         implicit none
 
         ! Subroutine I/O
-        real(kind=8), intent(in out) :: storm_array(:,:)
+        real(kind=8), intent(inout) :: storm_array(:,:)
         character(len=*), intent(in) :: data_path
         integer, intent(in) :: num_lats, last_storm_index
         integer, intent(inout) :: timestamp
@@ -329,7 +329,7 @@ contains
         implicit none
 
         ! Subroutine I/O
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
         real(kind=8), intent(in) :: t
 
         ! Local storage
@@ -406,7 +406,7 @@ contains
 
         ! Input
         real(kind=8), intent(in) :: t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Output
         real(kind=8) :: location(2)
@@ -468,32 +468,6 @@ contains
     end function storm_direction
 
     ! ==========================================================================
-    !  Use the 1980 Holland model to set the storm fields
-    ! ==========================================================================
-    subroutine set_HWRF_fields(maux, mbc, mx, my, xlower, ylower,    &
-                          dx, dy, t, aux, wind_index,           &
-                          pressure_index, storm)
-
-  
-        implicit none
-
-        ! Time of the wind field requested
-        integer, intent(in) :: maux,mbc,mx,my
-        real(kind=8), intent(in) :: xlower,ylower,dx,dy,t
-
-        ! Storm description, need in out here since we may update the storm
-        ! if at next time point
-        type(data_storm_type), intent(in out) :: storm
-
-        ! Array storing wind and presure field
-        integer, intent(in) :: wind_index, pressure_index
-        real(kind=8), intent(inout) :: aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
-
-        stop "HWRF data input is not yet implemented!"
-
-    end subroutine set_HWRF_fields
-
-    ! ==========================================================================
     !  set_wrf_storm_fields() added
     ! ==========================================================================
     subroutine set_wrf_storm_fields(maux, mbc, mx, my, xlower, ylower,    &
@@ -514,9 +488,9 @@ contains
         integer, intent(in) :: maux,mbc,mx,my
         real(kind=8), intent(in) :: xlower,ylower,dx,dy,t
 
-        ! Storm description, need in out here since we may update the storm
+        ! Storm description, need inout here since we may update the storm
         ! if at next time point
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Array storing wind and presure field
         integer, intent(in) :: wind_index, pressure_index
@@ -677,9 +651,9 @@ contains
 
         implicit none
 
-        ! Storm description, need "in out" here since will update the storm
+        ! Storm description, need "inout" here since will update the storm
         ! values at time t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Check if there are distinct storm "eyes"
         ! If not, interpolate wind & pressure fields in place.
@@ -704,9 +678,9 @@ contains
 
         implicit none
 
-        ! Storm description, need "in out" here since will update the storm
+        ! Storm description, need "inout" here since will update the storm
         ! values at time t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Local storage
         real(kind=8) :: alpha
@@ -740,9 +714,9 @@ contains
 
         implicit none
 
-        ! Storm description, need "in out" here since will update the storm
+        ! Storm description, need "inout" here since will update the storm
         ! values at time t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Local storage
         real(kind=8) :: alpha
@@ -793,9 +767,9 @@ contains
 
         implicit none
 
-        ! Storm description, need "in out" here since will update the storm
+        ! Storm description, need "inout" here since will update the storm
         ! values at time t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Local storage
         real(kind=8) :: alpha
