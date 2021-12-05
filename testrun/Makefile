@@ -25,7 +25,7 @@ PLOTDIR = _plots               # Directory for plots
 #FC = $(shell nc-config --fc)
 NF_CONFIG = nf-config
 LIB_PATHS = $(shell $(NF_CONFIG) --prefix)/lib
-INCLUDE = $(shell $(NF_CONFIG) --fflags)
+INCLUDE = $(shell $(NF_CONFIG) --includedir)
 NC_LINK_CMD = $(shell $(NF_CONFIG) --flibs)
 NC_LINK_CMD += $(shell $(NF_CONFIG) --cflags)
 
@@ -86,8 +86,8 @@ EXCLUDE_SOURCES = \
 RIEMANN = $(CLAW)/riemann/src
 
 MODULES = \
-  $(SRC_EXT)/data_storm_module_wrfclaw.f90 \
-  $(SRC_EXT)/storm_module_wrfclaw.f90 \
+  $(SRC_EXT)/data_storm_module.f90 \
+  $(SRC_EXT)/storm_module.f90 \
   $(GEOLIB)/gauges_module.f90 \
   $(GEOLIB)/multilayer/multilayer_module.f90 \
 

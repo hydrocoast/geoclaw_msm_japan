@@ -10,8 +10,7 @@
 !  license
 !                     http://www.opensource.org/licenses/
 ! ------------------------------------------------------------------------------
-! 2020/01/31, v1, NF added what are written in wrf_storm_module.f90
-!                 --> storm_location, set_wrf_storm_fields etc.
+! 2020/01/31, v1, NF edit
 ! ==============================================================================
 module data_storm_module
 
@@ -21,11 +20,11 @@ module data_storm_module
     logical, private :: module_setup = .false.
 
     ! Internal tracking variables for storm
-	logical, private :: DEBUG = .true. 
+    logical, private :: DEBUG = .true. 
     !logical, private :: DEBUG = .false. 
 
     ! Tolerance for floating point inequalities
-	real(kind=8), parameter :: eps = 1.0e-8 
+    real(kind=8), parameter :: eps = 1.0e-8 
 
     ! WRF storm type definition
     ! Specified wind & pressure field 
