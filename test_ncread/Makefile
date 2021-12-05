@@ -1,15 +1,14 @@
 
-FC = $(shell nc-config --fc) 
-FFLAGS = $(shell nc-config --fflags)
-FLIBS = $(shell nc-config --flibs)
+FC = $(shell nf-config --fc) 
+FFLAGS = $(shell nf-config --fflags)
+FLIBS = $(shell nf-config --flibs)
 EXE = xread_msmnc
 FILE = test_read.f90
 
-.PHONY: exe all clean
-all: exe
+.PHONY: exe clean
 
 exe:
 	$(FC) $(FILE) $(FFLAGS) $(FLIBS) -o $(EXE)
 
 clean:
-	\rm $(EXE)
+	-rm -f $(EXE)
