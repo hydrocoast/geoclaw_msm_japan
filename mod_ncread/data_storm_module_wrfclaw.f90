@@ -12,6 +12,7 @@
 ! ------------------------------------------------------------------------------
 ! 2020/01/31, v1, NF added what are written in wrf_storm_module.f90
 !                 --> storm_location, set_wrf_storm_fields etc.
+! 2022/01/27, v2, NF added ncfile read
 ! ==============================================================================
 module data_storm_module
 
@@ -264,6 +265,10 @@ contains
         integer :: yy, mm, dd, hh, nn
         integer, parameter :: data_file = 701
 
+        if (flag_input_wrf == 1)then
+
+            print *, "storm data format =====> *.swt"
+
         ! Open the input file
         !
         open(unit=data_file,file=data_path,status='old', &
@@ -315,6 +320,36 @@ contains
         timestamp = date_to_seconds(yy,mm,dd,hh,nn)
         close(data_file) 
 
+    elseif(flag_input_wrf == 2) then ! input by netCDF
+
+        print *, "storm data format =====> *.nc"
+
+        ! open
+        call check_ncstatus( nf90_open( trim( data_path ), nf90_nowrite, ncid) )
+        
+        ! number of array
+        ! -- lon
+        call check_ncstatus( nf90_inq_dimid(ncid, 'lon', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=nx) )
+        allocate(lon(nx))
+        call check_ncstatus( nf90_get_var(ncid, dimid, lon) )
+        ! -- lat
+        call check_ncstatus( nf90_inq_dimid(ncid, 'lat', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=ny) )
+        allocate(lat(ny))
+        call check_ncstatus( nf90_get_var(ncid, dimid, lat) )
+        ! -- timelap
+        call check_ncstatus( nf90_inq_dimid(ncid, 'time', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=nt) )
+        allocate(timelap(nt))
+        call check_ncstatus( nf90_get_var(ncid, dimid, timelap) )
+
+    else
+        ! ERROR process
+        print *, "Unsupported flag_input_wrf option"
+        stop
+    endif
+
     end subroutine read_wrf_storm_file
    
     ! ==========================================================================
@@ -354,7 +389,11 @@ contains
         ! This should probably be changed in the future.
 
         ! Read the u-velocity file
-        data_path = trim(storm%data_path) // "u10_d01.swt"
+        if (flag_input_wrf == 1) then 
+            data_path = trim(storm%data_path) // "u10_d01.swt"
+        elseif (flag_input_wrf == 2) then
+            data_path = trim(storm%data_path) // "aaaaa.nc" ! need to be changed
+        endif
         call read_wrf_storm_file(data_path,storm%u_next,storm%num_lats,storm%last_storm_index,timestamp,&
                                  flag_input_wrf)
         ! Error handling: set to clear skies if file ended
@@ -367,7 +406,11 @@ contains
         endif
 
         ! Read v-velocity file
-        data_path = trim(storm%data_path) // "v10_d01.swt"
+        if (flag_input_wrf == 1) then 
+            data_path = trim(storm%data_path) // "v10_d01.swt"
+        elseif (flag_input_wrf == 2) then
+            data_path = trim(storm%data_path) // "aaaaa.nc" ! need to be changed
+        endif
         call read_wrf_storm_file(data_path,storm%v_next,storm%num_lats,storm%last_storm_index,timestamp,&
         flag_input_wrf)
         ! Error handling: set to clear skies if file ended
@@ -376,7 +419,11 @@ contains
         endif
 
         ! Read pressure file
-        data_path = trim(storm%data_path) // "slp_d01.swt"
+        if (flag_input_wrf == 1) then 
+            data_path = trim(storm%data_path) // "slp_d01.swt"
+        elseif (flag_input_wrf == 2) then
+            data_path = trim(storm%data_path) // "aaaaa.nc" ! need to be changed
+        endif
         call read_wrf_storm_file(data_path,storm%p_next,storm%num_lats,storm%last_storm_index,timestamp,&
         flag_input_wrf)
         ! Error handling: set to clear skies if file ended
