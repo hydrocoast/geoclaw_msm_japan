@@ -143,8 +143,8 @@ def setrun(claw_pkg='geoclaw'):
     elif clawdata.output_style == 2:
         # Specify a list of output times.
         #clawdata.output_times = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0]
-        clawdata.output_times = [i*3600.0 for i in range(0,24)]
-        #clawdata.output_times = [i*3600.0 for i in range(0,121)]
+        #clawdata.output_times = [i*3600.0 for i in range(0,24)]
+        clawdata.output_times = [i*3600.0 for i in range(0,168)]
 
     elif clawdata.output_style == 3:
         # Output every iout timesteps with a total of ntot time steps:
@@ -340,16 +340,17 @@ def setrun(claw_pkg='geoclaw'):
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     regions.append([1, 1, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
+    regions.append([1, 4, days2seconds(2), clawdata.tfinal, 130.0, 140.0, 25.0, 40.0])
 
     # gauges
     gauges = rundata.gaugedata.gauges
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    #dat = np.genfromtxt(os.path.join(gaugedir,'gauge_list_japan.csv'), delimiter=',',  skip_header=0, dtype='float')
+    dat = np.genfromtxt(os.path.join(gaugedir,'gauge_list_japan.csv'), delimiter=',',  skip_header=0, dtype='float')
     #[gauges.append(dat[i]) for i in range(0,dat.shape[0])]
-    gauges.append([1, 129.5333, 28.3167, 0., 1.e10]) # Amami
-    gauges.append([2, 124.1667, 24.3333, 0., 1.e10]) # Ishigaki
-    gauges.append([3, 135.7667, 33.4833, 0., 1.e10]) # Kushimoto
-    gauges.append([4, 144.2833, 44.0167, 0., 1.e10]) # Abashiri
+    #gauges.append([1, 129.5333, 28.3167, 0., 1.e10]) # Amami
+    #gauges.append([2, 124.1667, 24.3333, 0., 1.e10]) # Ishigaki
+    #gauges.append([3, 135.7667, 33.4833, 0., 1.e10]) # Kushimoto
+    #gauges.append([4, 144.2833, 44.0167, 0., 1.e10]) # Abashiri
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
