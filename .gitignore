@@ -25,6 +25,7 @@
 *.asv
 *.data
 *.log
+*.out
 _jld2/
 _mat/
 _output/

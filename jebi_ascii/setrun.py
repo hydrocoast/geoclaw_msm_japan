@@ -346,7 +346,7 @@ def setrun(claw_pkg='geoclaw'):
     gauges = rundata.gaugedata.gauges
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
     dat = np.genfromtxt(os.path.join(gaugedir,'gauge_list_japan.csv'), delimiter=',',  skip_header=0, dtype='float')
-    #[gauges.append(dat[i]) for i in range(0,dat.shape[0])]
+    [gauges.append(dat[i]) for i in range(0,dat.shape[0])]
     #gauges.append([1, 129.5333, 28.3167, 0., 1.e10]) # Amami
     #gauges.append([2, 124.1667, 24.3333, 0., 1.e10]) # Ishigaki
     #gauges.append([3, 135.7667, 33.4833, 0., 1.e10]) # Kushimoto
