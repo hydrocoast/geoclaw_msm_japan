@@ -290,7 +290,7 @@ def setrun(claw_pkg='geoclaw'):
     # List of refinement ratios at each level (length at least mxnest-1)
     amrdata.refinement_ratios_x = [3,4,4]
     amrdata.refinement_ratios_y = [3,4,4]
-    amrdata.refinement_ratios_t = [3,4,4]
+    amrdata.refinement_ratios_t = [3,2,2]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -345,7 +345,7 @@ def setrun(claw_pkg='geoclaw'):
     # gauges
     gauges = rundata.gaugedata.gauges
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    #dat = np.genfromtxt(os.path.join(gaugedir,'gauge_list_japan.csv'), delimiter=',',  skip_header=0, dtype='float')
+    dat = np.genfromtxt(os.path.join(gaugedir,'gauge_list_japan.csv'), delimiter=',',  skip_header=0, dtype='float')
     #[gauges.append(dat[i]) for i in range(0,dat.shape[0])]
     gauges.append(dat[66]) # 室戸岬
     gauges.append(dat[27]) # 阿波由岐
@@ -457,7 +457,23 @@ def setgeo(rundata):
     fg.arrival_tol = 2.0e-1
     fg.tstart_max = 0.0    # just before wave arrives
     fg.tend_max = 1.e10    # when to stop monitoring max values
-    fg.dt_check = 60.0     # how often to update max values
+    fg.dt_check = 5.0     # how often to update max values
+    fg.interp_method = 0   # 0 ==> pw const in cells, recommended
+    rundata.fgmax_data.fgmax_grids.append(fg)  # written to fgmax_grids.data
+
+    # Around Osaka bay
+    fg = fgmax_tools.FGmaxGrid()
+    fg.point_style = 2  # uniform rectangular x-y grid
+    fg.dx = 1.0/240.0    # desired resolution of fgmax grid
+    fg.x1 = 132.0
+    fg.x2 = 137.0
+    fg.y1 = 30.0
+    fg.y2 = 35.0
+    fg.min_level_check = 1 # which levels to monitor max on
+    fg.arrival_tol = 2.0e-1
+    fg.tstart_max = 0.0    # just before wave arrives
+    fg.tend_max = 1.e10    # when to stop monitoring max values
+    fg.dt_check = 5.0     # how often to update max values
     fg.interp_method = 0   # 0 ==> pw const in cells, recommended
     rundata.fgmax_data.fgmax_grids.append(fg)  # written to fgmax_grids.data
 

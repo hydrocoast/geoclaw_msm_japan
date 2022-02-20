@@ -77,9 +77,10 @@ print("end\n")
 
 ## plot eta
 print("plotting eta ...     ")
-plts = plotsamr(amrall; clims=(-0.5,0.5), c=:bwr, colorbar=true)
+plts = plotsamr(amrall; clims=(-0.5,0.5), c=:bwr, colorbar=true, AMRlevel=1:4, xlims=(120.0,150.0), ylims=(22.4,47.6))
 plts = map((p,s)->plot!(p; title=s), plts, tstr)
-plts = map((p,k)->plotstrack!(p, track, 1:k; lc=:black), plts, 1:amrall.nstep)
+#plts = map((p,k)->plotstrack!(p, track, 1:k; lc=:black), plts, 1:amrall.nstep)
+plts[73:end] = map((p,k)->plotstrack!(p, track, 73:min(k,146); lc=:black), plts[73:end], 73:amrall.nstep)
 map((p,k)->savefig(p, joinpath(plotdir,"surf_"*@sprintf("%03d",k)*".png")), plts, 1:amrall.nstep)
 print("end\n")
 
