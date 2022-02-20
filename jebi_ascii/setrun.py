@@ -345,12 +345,21 @@ def setrun(claw_pkg='geoclaw'):
     # gauges
     gauges = rundata.gaugedata.gauges
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    dat = np.genfromtxt(os.path.join(gaugedir,'gauge_list_japan.csv'), delimiter=',',  skip_header=0, dtype='float')
-    [gauges.append(dat[i]) for i in range(0,dat.shape[0])]
-    #gauges.append([1, 129.5333, 28.3167, 0., 1.e10]) # Amami
-    #gauges.append([2, 124.1667, 24.3333, 0., 1.e10]) # Ishigaki
-    #gauges.append([3, 135.7667, 33.4833, 0., 1.e10]) # Kushimoto
-    #gauges.append([4, 144.2833, 44.0167, 0., 1.e10]) # Abashiri
+    #dat = np.genfromtxt(os.path.join(gaugedir,'gauge_list_japan.csv'), delimiter=',',  skip_header=0, dtype='float')
+    #[gauges.append(dat[i]) for i in range(0,dat.shape[0])]
+    gauges.append(dat[66]) # 室戸岬
+    gauges.append(dat[27]) # 阿波由岐
+    gauges.append(dat[53]) # 小松島
+    gauges.append(dat[99]) # 洲本
+    gauges.append(dat[50]) # 神戸
+    gauges.append(dat[79]) # 大阪
+    gauges.append(dat[108]) # 淡輪
+    gauges.append(dat[116]) # 和歌山
+    #gauges.append(dat[XX]) # 海南
+    gauges.append(dat[43]) # 御坊
+    gauges.append(dat[98]) # 白浜
+    gauges.append(dat[56]) # 串本
+    gauges.append(dat[113]) # 浦神
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
