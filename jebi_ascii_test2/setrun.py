@@ -89,8 +89,8 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.upper[1] = 50.0    # north latitude
 
     # Number of grid cells:
-    clawdata.num_cells[0] = 170
-    clawdata.num_cells[1] = 150
+    clawdata.num_cells[0] = 510
+    clawdata.num_cells[1] = 450
 
 
     # ---------------
@@ -285,12 +285,12 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
+    amrdata.amr_levels_max = 3
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [3,4,4]
-    amrdata.refinement_ratios_y = [3,4,4]
-    amrdata.refinement_ratios_t = [3,4,4]
+    amrdata.refinement_ratios_x = [4,4]
+    amrdata.refinement_ratios_y = [4,4]
+    amrdata.refinement_ratios_t = [4,4]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -340,7 +340,7 @@ def setrun(claw_pkg='geoclaw'):
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     regions.append([1, 1, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
-    regions.append([2, 4, days2seconds(2), clawdata.tfinal, 130.0, 140.0, 25.0, 40.0])
+    regions.append([1, 3, days2seconds(2), clawdata.tfinal, 130.0, 140.0, 25.0, 40.0])
 
     # gauges
     gauges = rundata.gaugedata.gauges
@@ -360,6 +360,11 @@ def setrun(claw_pkg='geoclaw'):
     gauges.append(dat[98]) # 白浜
     gauges.append(dat[56]) # 串本
     gauges.append(dat[113]) # 浦神
+    ## 
+    gauges.append([1000, 134.8898, 33.6550]) #田辺・美波町沖合 
+    gauges.append([1001, 134.9227, 34.0322]) #有田・小松島沖合 
+    gauges.append([1002, 135.0220, 34.3602]) #洲本沖合
+    gauges.append([1003, 135.3195, 34.6056]) #大阪湾湾奥付近
 
     #------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -455,9 +460,9 @@ def setgeo(rundata):
     fg.y2 = 50.0
     fg.min_level_check = 1 # which levels to monitor max on
     fg.arrival_tol = 2.0e-1
-    fg.tstart_max = 0.0    # just before wave arrives
+    fg.tstart_max = days2seconds(2)    # just before wave arrives
     fg.tend_max = 1.e10    # when to stop monitoring max values
-    fg.dt_check = 5.0     # how often to update max values
+    fg.dt_check = 1.0     # how often to update max values
     fg.interp_method = 0   # 0 ==> pw const in cells, recommended
     rundata.fgmax_data.fgmax_grids.append(fg)  # written to fgmax_grids.data
 
@@ -471,9 +476,9 @@ def setgeo(rundata):
     fg.y2 = 35.0
     fg.min_level_check = 3 # which levels to monitor max on
     fg.arrival_tol = 2.0e-1
-    fg.tstart_max = 0.0    # just before wave arrives
+    fg.tstart_max = days2seconds(2)    # just before wave arrives
     fg.tend_max = 1.e10    # when to stop monitoring max values
-    fg.dt_check = 5.0     # how often to update max values
+    fg.dt_check = 1.0     # how often to update max values
     fg.interp_method = 0   # 0 ==> pw const in cells, recommended
     rundata.fgmax_data.fgmax_grids.append(fg)  # written to fgmax_grids.data
 

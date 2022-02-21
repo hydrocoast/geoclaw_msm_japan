@@ -7,6 +7,6 @@ if [ -z "$1" ]; then
 fi
 
 export OMP_NUM_THREADS=$1
-make && make data && (make output |tee calc.log)
+make && make data && (make output 2>&1 |tee calc.log)
 make juliaall && ./creategif.sh
 #make matlabplots
