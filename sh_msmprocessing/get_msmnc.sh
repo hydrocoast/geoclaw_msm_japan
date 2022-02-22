@@ -3,7 +3,7 @@
 url_parent='http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/latest/'
 datestr=`date -u "+%Y%m%d"`
 
-hh_init='12'
+hh_init='00'
 
 url_target="${url_parent}${datestr}/MSM${datestr}${hh_init}S.nc"
 
