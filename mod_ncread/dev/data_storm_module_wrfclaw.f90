@@ -12,7 +12,7 @@
 ! ------------------------------------------------------------------------------
 ! 2020/01/31, v1, NF added what are written in wrf_storm_module.f90
 !                 --> storm_location, set_wrf_storm_fields etc.
-! 2022/01/27, v2, NF added ncfile read 
+! 2022/01/27, v2, NF added ncfile read
 ! 2022/08/05, v3, NF added ncfile read in sequence (need buffer layer)
 ! ==============================================================================
 module data_storm_module
@@ -88,6 +88,9 @@ module data_storm_module
         ! Store the storm data file for repeated reading
         character(len=4096) :: data_path
 
+        ! Storm specification type
+        integer :: storm_specification_type
+
     end type data_storm_type
 
 contains
@@ -99,7 +102,7 @@ contains
 
     use geoclaw_module, only: coordinate_system, ambient_pressure
     use amr_module, only: t0
-    use storm_module, only: flag_input_wrf
+    ! use storm_module, only: flag_input_wrf
 
         implicit none
 
@@ -152,7 +155,9 @@ contains
             storm%data_path = './'
         endif
 
-        if (flag_input_wrf == 2) then
+        storm%storm_specification_type = storm_spec_type
+
+        if (storm%storm_specification_type == -1) then
 
             ! Monitor output
             print *, "storm data format =====> *.swt"
@@ -213,7 +218,7 @@ contains
                 call read_wrf_storm(storm,t0)
             endif
 
-        elseif (flag_input_wrf == 1) then
+        elseif (storm%storm_specification_type == -2) then
 
             ! Monitor output
             print *, "storm data format =====> *.nc"
@@ -557,6 +562,11 @@ contains
         storm%u_next = u10(:,ny:1:-1,it)
         storm%v_next = v10(:,ny:1:-1,it)
 
+        ! add buffer layer
+
+        
+
+
         ! Convert pressure units: mbar (hPa) to Pa
         ! storm%p_next = storm%p_next * 1.0e2 ! NC file uses Pa
         ! Estimate storm center location based on lowest pressure
@@ -810,7 +820,7 @@ contains
 
         use geoclaw_module, only: rad2deg  
 
-        use storm_module, only: flag_input_wrf
+        ! use storm_module, only: flag_input_wrf
 
 
         implicit none
@@ -847,12 +857,12 @@ contains
         if (DEBUG) print *,"loading new storm snapshot ",&
                         "t=",t,"old t_next=",storm%t_next
 
-        print *, "flag = ",flag_input_wrf
+        print *, "flag = ",storm%storm_specification_type!flag_input_wrf
         print *, "it = ",it, " ifile_nc = ",ifile_nc
         print *, "yymmddhhnn = ", yy ,mm, dd, hh, nn
-        if (flag_input_wrf==2)then
+        if (storm%storm_specification_type==-1)then
             call read_wrf_storm(storm,t)
-        elseif (flag_input_wrf==1)then
+        elseif (storm%storm_specification_type==-2)then
             call read_wrf_storm_nc( storm, t )
         endif
         if (DEBUG) print *,"new t_next=",storm%t_next

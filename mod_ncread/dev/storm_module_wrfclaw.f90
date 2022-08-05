@@ -53,9 +53,6 @@ module storm_module
     ! Wind drag limit
     real(kind=8) :: WIND_DRAG_LIMIT = 3.5d-3
 
-    ! Input type (only for WRF input)
-    integer :: flag_input_wrf
-
     ! Interface to each of the parameterized models
     abstract interface
         subroutine set_model_fields_def(maux, mbc, mx, my, xlower, ylower, &
@@ -241,7 +238,6 @@ contains
                     case(-2) ! WRF Data (NetCDF input)
                         set_data_fields => set_wrf_storm_fields
                 end select
-                flag_input_wrf = 3 + storm_specification_type
                 call set_data_storm(storm_file_path,data_storm,         &
                                     storm_specification_type, log_unit )
                 print *, "Storm is set by WRF Output !!!"

@@ -29,7 +29,7 @@ def days2seconds(days):
     return days * 60.0**2 * 24.0
 
 # Scratch directory for storing topo and dtopo files:
-topodir = os.path.join(os.getcwd(), '..', 'topo','haishen')
+topodir = os.path.join(os.getcwd(), '..', 'topo')
 # topolist
 topoflist = {
              "GEBCO2020":"gebco_2020_n60.0_s0.0_w105.0_e165.0_landmask.asc",
