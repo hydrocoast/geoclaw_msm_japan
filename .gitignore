@@ -13,6 +13,7 @@
 *.gz
 *.bz
 *.xz
+*.mat
 *.nc
 *.nc.*
 *.grd
@@ -26,6 +27,7 @@
 *.data
 *.log
 *.out
+topo/
 _jld2/
 _mat/
 _output/
@@ -38,7 +40,6 @@ xgeoclaw
 x*
 .vscode
 *.asc
-a.out
 test2.f90
 .output
 .data
