@@ -78,7 +78,7 @@ program read_msmnc
   write(*,*) timelap(lbound(timelap)), timelap(ubound(timelap))
   write(*,*) minval(lon), maxval(lon), minval(lat), maxval(lat)
   do k = 1, nt
-    write(*,*) k, maxval(psea(:,:,k)), minval(psea(:,:,k)), &
+    write(*,*) timelap(k), maxval(psea(:,:,k)), minval(psea(:,:,k)), &
   &               maxval(u10(:,:,k)), minval(u10(:,:,k)), maxval(v10(:,:,k)), minval(v10(:,:,k))
   end do
 

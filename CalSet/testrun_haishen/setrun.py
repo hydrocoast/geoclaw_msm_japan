@@ -21,19 +21,23 @@ from clawpack.geoclaw.surge.storm import Storm
 import clawpack.clawutil as clawutil
 from clawpack.geoclaw import fgmax_tools
 from clawpack.geoclaw.data import ForceDry
+from clawpack.geoclaw import topotools
 
-# Need to adjust the date a bit due to weirdness with leap year (I think)
-#landfall = datetime.datetime(1979,9,1,18) - datetime.datetime(1979,1,1,0)
 
 # Time Conversions
 def days2seconds(days):
     return days * 60.0**2 * 24.0
 
-
 # Scratch directory for storing topo and dtopo files:
-#scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
-topodir = os.path.join(os.getcwd(), '..', 'topo')
-
+topodir = os.path.join(os.getcwd(), '..', 'topo','haishen')
+# topolist
+topoflist = {
+             "GEBCO2020":"gebco_2020_n60.0_s0.0_w105.0_e165.0_landmask.asc",
+             "Z01_2430_01":"depth_2430-01_zone01_lonlat_5mWall_ver2.asc",
+             "Z01_0810_02":"depth_0810-02_zone01_lonlat_5mWall_ver2.asc",
+             "Z01_0270_03":"depth_0270-03_zone01_lonlat_5mWall_ver2.asc",
+             "Z01_0270_04":"depth_0270-04_zone01_lonlat_5mWall_ver2.asc",
+             }
 
 # ------------------------------
 def setrun(claw_pkg='geoclaw'):
@@ -82,14 +86,14 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_dim = num_dim
 
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -1062000.0         # west X
-    clawdata.upper[0] =   396000.0 -2430.0 # east X
-    clawdata.lower[1] =  -862000.0         # south Y
-    clawdata.upper[1] =   377300.0 -2430.0 # north Y
+    clawdata.lower[0] = 120.0    # west longitude
+    clawdata.upper[0] = 150.0   # east longitude
+    clawdata.lower[1] = 15.0    # south latitude
+    clawdata.upper[1] = 45.0   # north latitude
 
-    # Number of grid cells:
-    clawdata.num_cells[0] = 599 # nx 
-    clawdata.num_cells[1] = 509 # ny
+    # Number of grid cells
+    clawdata.num_cells[0] = 300 # nx
+    clawdata.num_cells[1] = 300 # ny
 
 
     # ---------------
@@ -105,14 +109,14 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_aux = 3 + 1 + 3
 
     # Index of aux array corresponding to capacity function, if there is one:
-    clawdata.capa_index = 0 # 0 for cartesian x-y, 2 for spherical lat-lon
-
+    clawdata.capa_index = 2 # 0 for cartesian x-y, 2 for spherical lat-lon
     
     
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = 0.0
+    clawdata.t0 = 0.0                # for WRF input
+    # clawdata.t0 = -1.29600000e+05  # for TC model
 
     # Restart from checkpoint file of a previous run?
     # If restarting, t0 above should be from original run, and the
@@ -130,7 +134,7 @@ def setrun(claw_pkg='geoclaw'):
     # Note that the time integration stops after the final output time.
     # The solution at initial time t0 is always written in addition.
 
-    clawdata.output_style = 2
+    clawdata.output_style = 3
     clawdata.tfinal = days2seconds(5) + 3600.0
 
     if clawdata.output_style==1:
@@ -141,12 +145,13 @@ def setrun(claw_pkg='geoclaw'):
     elif clawdata.output_style == 2:
         # Specify a list of output times.
         #clawdata.output_times = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0]
-        clawdata.output_times = [i*3600.0 for i in range(0,122)]
+        clawdata.output_times = [i*3600.0 for i in range(0,120)]
+        #clawdata.output_times = [i*600.0 for i in range(0,13)]
 
     elif clawdata.output_style == 3:
         # Output every iout timesteps with a total of ntot time steps:
         clawdata.output_step_interval = 1
-        clawdata.total_steps = 1
+        clawdata.total_steps = 3
         clawdata.output_t0 = True
         
 
@@ -178,7 +183,7 @@ def setrun(claw_pkg='geoclaw'):
 
     # Initial time step for variable dt.
     # If dt_variable==0 then dt=dt_initial for all steps:
-    clawdata.dt_initial = 0.02
+    clawdata.dt_initial = 0.5
 
     # Max time step to be allowed if variable dt used:
     clawdata.dt_max = 1e+99
@@ -282,20 +287,20 @@ def setrun(claw_pkg='geoclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 5
+    amrdata.amr_levels_max = 4
 
     # List of refinement ratios at each level (length at least mxnest-1)
-    amrdata.refinement_ratios_x = [3,3,3,3]
-    amrdata.refinement_ratios_y = [3,3,3,3]
-    amrdata.refinement_ratios_t = [3,3,3,3]
+    amrdata.refinement_ratios_x = [6,2,2]
+    amrdata.refinement_ratios_y = [6,2,2]
+    amrdata.refinement_ratios_t = [6,2,2]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length maux, each element of which is one of:
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
 
-    #amrdata.aux_type = ['center','capacity','yleft','center','center','center','center', 'center', 'center'] # For lon-lat
-    amrdata.aux_type = ['center','center','yleft','center','center','center','center', 'center', 'center']  # For X-Y
+    amrdata.aux_type = ['center','capacity','yleft','center','center','center','center', 'center', 'center'] # For lon-lat
+    # amrdata.aux_type = ['center','center','yleft','center','center','center','center', 'center', 'center']  # For X-Y
 
 
     # Flag using refinement routine flag2refine rather than richardson error
@@ -307,7 +312,7 @@ def setrun(claw_pkg='geoclaw'):
 
     # width of buffer zone around flagged points:
     # (typically the same as regrid_interval so waves don't escape):
-    amrdata.regrid_buffer_width  = 2
+    amrdata.regrid_buffer_width  = 3
 
     # clustering alg. cutoff for (# flagged pts) / (total # of cells refined)
     # (closer to 1.0 => more small grids may be needed to cover flagged cells)
@@ -337,31 +342,29 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
+    regions.append([1, 2, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
+    topo_file = topotools.Topography(os.path.join(topodir, topoflist['GEBCO2020']), topo_type=3)
+    regions.append([1, 3, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
+    topo_file = topotools.Topography(os.path.join(topodir, topoflist['Z01_2430_01']), topo_type=3)
+    regions.append([1, 4, clawdata.t0, clawdata.tfinal, clawdata.lower[0], clawdata.upper[0], clawdata.lower[1], clawdata.upper[1]])
+    topo_file = topotools.Topography(os.path.join(topodir, topoflist['Z01_0810_02']), topo_type=3)
+
     
     # Target simulation domain
-
-    # gauges 
-    #rundata.gaugedata.gauges.append([1, 2.5, 0.0, 0., 1.e10])
-    rundata.gaugedata.gauges.append([1, -148259.0, -152271.0, 0., 1.e10]) # Omaezaki
-    rundata.gaugedata.gauges.append([2, -120163.0, -108297.0, 0., 1.e10]) # Shimizu
-    rundata.gaugedata.gauges.append([3,  -89128.0, -108677.0, 0., 1.e10]) # Uchiura
-    rundata.gaugedata.gauges.append([4,  -87745.0, -155540.0, 0., 1.e10]) # Irozaki
-    rundata.gaugedata.gauges.append([5,  -26157.0, -216277.0, 0., 1.e10]) # Miyakejima
-    rundata.gaugedata.gauges.append([6,  -41183.0, -132450.0, 0., 1.e10]) # Okada
-    rundata.gaugedata.gauges.append([7,  -62196.0,  -84840.0, 0., 1.e10]) # Odawara
-    rundata.gaugedata.gauges.append([8,   -6036.0,  -38828.0, 0., 1.e10]) # Tokyo
-    rundata.gaugedata.gauges.append([9,   -2430.0, -122612.0, 0., 1.e10]) # Mera
-    rundata.gaugedata.gauges.append([10,  19237.0,  -47900.0, 0., 1.e10]) # Chibako
-    #(-148259.69955929325, -152271.87440424366)
-    #(-120163.33915535029, -108297.50570064224)
-    #(-86698.87075035876, -108677.38864516467)
-    #(-90175.88456599312, -153020.6799371466)
-    #(-26157.766996316208, -216277.23930901662)
-    #(-41183.69595472718, -134880.70228973124)
-    #(-62196.928931328344, -84840.65226609632)
-    #(-6036.757078895429, -38828.58597665606)
-    #(-3.254854452358613e-8, -120182.73355006939)
-
+    gauges = rundata.gaugedata.gauges
+    gauges.append([1, 130.22, 33.00, 0., 1.e10]) # Oura
+    gauges.append([2, 130.20, 32.57, 0., 1.e10]) # Kuchinotsu
+    gauges.append([3, 130.25, 33.10, 0., 1.e10]) # Saga
+    gauges.append([4, 130.01, 32.47, 0., 1.e10]) # Reihoku
+    gauges.append([5, 128.95, 32.70, 0., 1.e10]) # Fukue
+    gauges.append([6, 130.60, 31.10, 0., 1.e10]) # Kagoshima
+    gauges.append([7, 130.30, 31.20, 0., 1.e10]) # Makurazaki
+    gauges.append([8, 131.42, 31.58, 0., 1.e10]) # Aburatsu
+    gauges.append([9, 132.00, 32.97, 0., 1.e10]) # Saeki
+    gauges.append([10, 132.97, 32.60, 0., 1.e10]) # Tosa-Shimizu
+    gauges.append([11, 132.43, 33.25, 0., 1.e10]) # Uwajima
+    gauges.append([12, 132.50, 33.80, 0., 1.e10]) # Matsuyama
+    gauges.append([13, 131.04, 34.00, 0., 1.e10]) # Shimonoseki
 
 
     #------------------------------------------------------------------
@@ -390,8 +393,8 @@ def setgeo(rundata):
        
     # == Physics ==
     geo_data.gravity = 9.81
-    #geo_data.coordinate_system = 2 # lonlat
-    geo_data.coordinate_system = 1 # XY
+    geo_data.coordinate_system = 2 # lonlat
+    # geo_data.coordinate_system = 1 # XY
     geo_data.earth_radius = 6367.5e3
     geo_data.rho = 1025.0
     geo_data.rho_air = 1.15
@@ -409,8 +412,8 @@ def setgeo(rundata):
 
     # Refinement Criteria
     refine_data = rundata.refinement_data
-    refine_data.wave_tolerance = 0.20
-    refine_data.speed_tolerance = [0.25, 0.50, 0.75, 1.00]
+    refine_data.wave_tolerance = 0.2
+    refine_data.speed_tolerance = 1.0 #[0.25, 0.50, 0.75, 1.00]
 
     refine_data.deep_depth = 3.0e3
     refine_data.max_level_deep = 2
@@ -423,11 +426,7 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for the
     # smaller domains
-    topo_data.topofiles.append([3, 1, 1, rundata.clawdata.t0, rundata.clawdata.tfinal, os.path.join(topodir,'topo_01L_mask.dat')])
-    topo_data.topofiles.append([3, 1, 2, rundata.clawdata.t0, rundata.clawdata.tfinal, os.path.join(topodir,'topo_02_mask.dat')])
-    topo_data.topofiles.append([3, 1, 3, rundata.clawdata.t0, rundata.clawdata.tfinal, os.path.join(topodir,'topo_03_mask.dat')])
-    topo_data.topofiles.append([3, 1, 4, rundata.clawdata.t0, rundata.clawdata.tfinal, os.path.join(topodir,'topo_04_mask.dat')])
-    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0, rundata.clawdata.tfinal, os.path.join(topodir,'topo_05.dat')])
+    topo_data.topofiles.append([3, 1, 4, rundata.clawdata.t0, rundata.clawdata.tfinal, os.path.join(topodir, topoflist['GEBCO2020'])])
 
     # == setdtopo.data values ==
     dtopo_data = rundata.dtopo_data
@@ -442,10 +441,10 @@ def setgeo(rundata):
     #   [minlev, maxlev, fname]
 
     # NEW feature to force dry land some locations below sea level:
-    force_dry = ForceDry()
-    force_dry.tend = 1e10
-    force_dry.fname = os.path.join(topodir, 'force_dry_init_05.dat')
-    rundata.qinit_data.force_dry_list.append(force_dry)
+    # force_dry = ForceDry()
+    # force_dry.tend = 1e10
+    # force_dry.fname = os.path.join(topodir, 'force_dry_init_05.dat')
+    # rundata.qinit_data.force_dry_list.append(force_dry)
 
     # == setfixedgrids.data values ==
     rundata.fixed_grid_data.fixedgrids = []
@@ -456,36 +455,76 @@ def setgeo(rundata):
     # == fgmax.data values ==
     fgmax_files = rundata.fgmax_data.fgmax_files
     # Points on a uniform 2d grid:
-    # Domain 4
+
+    ## 2430
+    topo_file = topotools.Topography(os.path.join(topodir, topoflist['Z01_2430_01']), topo_type=3)
     fg = fgmax_tools.FGmaxGrid()
     fg.point_style = 2  # uniform rectangular x-y grid
-    fg.dx = 90.0           # desired resolution of fgmax grid
-    fg.x1 = -20790.0
-    fg.x2 =  28710.0 - fg.dx
-    fg.y1 = -82690.0
-    fg.y2 = -19690.0 - fg.dx
+    fg.dx = topo_file.delta[0]        # desired resolution of fgmax grid
+    fg.x1 = topo_file.x[0]
+    fg.x2 = topo_file.x[-1]
+    fg.y1 = topo_file.y[0]
+    fg.y2 = topo_file.y[-1]
     fg.min_level_check = 1 # which levels to monitor max on
     fg.arrival_tol = 1.0e-1
-    fg.tstart_max = 3600.0*48.0    # just before wave arrives
+    fg.tstart_max = 3600.0*24    # just before wave arrives
     fg.tend_max = 1.e10    # when to stop monitoring max values
     fg.dt_check = 60.0     # how often to update max values
     fg.interp_method = 0   # 0 ==> pw const in cells, recommended
     rundata.fgmax_data.fgmax_grids.append(fg)  # written to fgmax_grids.data
-    # Domain 5
+
+    ## 810
+    topo_file = topotools.Topography(os.path.join(topodir, topoflist['Z01_0810_02']), topo_type=3)
     fg = fgmax_tools.FGmaxGrid()
     fg.point_style = 2  # uniform rectangular x-y grid
-    fg.dx = 30.0           # desired resolution of fgmax grid
-    fg.x1 = -11730.0
-    fg.x2 =   7770.0 - fg.dx
-    fg.y1 = -49630.0
-    fg.y2 = -19930.0 - fg.dx
+    fg.dx = topo_file.delta[0]        # desired resolution of fgmax grid
+    fg.x1 = topo_file.x[0]
+    fg.x2 = topo_file.x[-1]
+    fg.y1 = topo_file.y[0]
+    fg.y2 = topo_file.y[-1]
     fg.min_level_check = 1 # which levels to monitor max on
     fg.arrival_tol = 1.0e-1
-    fg.tstart_max = 3600.0*48.0    # just before wave arrives
+    fg.tstart_max = 3600.0*24    # just before wave arrives
     fg.tend_max = 1.e10    # when to stop monitoring max values
     fg.dt_check = 60.0     # how often to update max values
     fg.interp_method = 0   # 0 ==> pw const in cells, recommended
     rundata.fgmax_data.fgmax_grids.append(fg)  # written to fgmax_grids.data
+
+    ## 1/360
+    topo_file = topotools.Topography(os.path.join(topodir, topoflist['Z01_0270_03']), topo_type=3)
+    fg = fgmax_tools.FGmaxGrid()
+    fg.point_style = 2  # uniform rectangular x-y grid
+    fg.dx = topo_file.delta[0]        # desired resolution of fgmax grid
+    fg.x1 = topo_file.x[0]
+    fg.x2 = topo_file.x[-1]
+    fg.y1 = topo_file.y[0]
+    fg.y2 = topo_file.y[-1]
+    fg.min_level_check = 1 # which levels to monitor max on
+    fg.arrival_tol = 1.0e-1
+    fg.tstart_max = 0.0    # just before wave arrives
+    fg.tend_max = 1.e10    # when to stop monitoring max values
+    fg.dt_check = 10.0     # how often to update max values
+    fg.interp_method = 0   # 0 ==> pw const in cells, recommended
+    rundata.fgmax_data.fgmax_grids.append(fg)  # written to fgmax_grids.data
+
+    ## 1/360
+    topo_file = topotools.Topography(os.path.join(topodir, topoflist['Z01_0270_04']), topo_type=3)
+    fg = fgmax_tools.FGmaxGrid()
+    fg.point_style = 2  # uniform rectangular x-y grid
+    fg.dx = topo_file.delta[0]        # desired resolution of fgmax grid
+    fg.x1 = topo_file.x[0]
+    fg.x2 = topo_file.x[-1]
+    fg.y1 = topo_file.y[0]
+    fg.y2 = topo_file.y[-1]
+    fg.min_level_check = 1 # which levels to monitor max on
+    fg.arrival_tol = 1.0e-1
+    fg.tstart_max = 0.0    # just before wave arrives
+    fg.tend_max = 1.e10    # when to stop monitoring max values
+    fg.dt_check = 10.0     # how often to update max values
+    fg.interp_method = 0   # 0 ==> pw const in cells, recommended
+    rundata.fgmax_data.fgmax_grids.append(fg)  # written to fgmax_grids.data
+
+
     # num_fgmax_val
     rundata.fgmax_data.num_fgmax_val = 5  # 1 to save depth, 2 to save depth and speed, and 5 to Save depth, speed, momentum, momentum flux and hmin
 
@@ -496,23 +535,24 @@ def setgeo(rundata):
 
     # Source term controls - These are currently not respected
     data.wind_forcing = True
-    #data.drag_law = 1
-    data.drag_law = 4 # Mitsuyasu & Kusaba no limit drag coeff
+    data.drag_law = 1
+    #data.drag_law = 4 # Honda & Mitsuyasu no limit drag coeff
     data.pressure_forcing = True
 
     # AMR parameters
-    data.wind_refine = False # m/s
+    data.wind_refine = [20.0,30.0,40.0] # m/s
     data.R_refine = False  # m
     
     # Storm parameters
-    #data.storm_type = 1 # Type of storm
-    data.storm_type = -1 # Explicit storm fields. See ./wrf_storm_module.f90
+    data.storm_type = -2 # Type of storm
     data.storm_specification_type = 'WRF'
     #data.landfall = 3600.0
     data.display_landfall_time = True
 
     # Storm type 2 - Idealized storm track
-    data.storm_file = os.path.join(os.getcwd(),'../rcm/')
+    data.storm_file = os.path.join(os.getcwd(),'./')
+
+    # Calculate landfall time - Need to specify as the file above does not
 
     # =======================
     #  Set Variable Friction

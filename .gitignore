@@ -26,3 +26,8 @@ gmt.*
 .DS_Store
 xgeoclaw
 x*
+.vscode
+*.asc
+a.out
+test2.f90
+

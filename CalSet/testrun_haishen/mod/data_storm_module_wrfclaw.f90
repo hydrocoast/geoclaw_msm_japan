@@ -12,6 +12,8 @@
 ! ------------------------------------------------------------------------------
 ! 2020/01/31, v1, NF added what are written in wrf_storm_module.f90
 !                 --> storm_location, set_wrf_storm_fields etc.
+! 2022/01/27, v2, NF added ncfile read 
+! 2022/08/05, v3, NF added ncfile read in sequence (need buffer layer)
 ! ==============================================================================
 module data_storm_module
 
@@ -26,6 +28,17 @@ module data_storm_module
 
     ! Tolerance for floating point inequalities
 	real(kind=8), parameter :: eps = 1.0e-8 
+
+    ! List of storm files (only netCDF input)
+    character(len=100),allocatable :: ncfilelist(:)
+
+    ! Pointer for reading nc files (only netCDF input)
+    integer :: ifile_nc 
+    integer :: nfile_nc ! number of nc files
+
+    ! Counter variable
+    integer :: it
+    integer :: yy, mm, dd, hh, nn
 
     ! WRF storm type definition
     ! Specified wind & pressure field 
@@ -86,6 +99,7 @@ contains
 
     use geoclaw_module, only: coordinate_system, ambient_pressure
     use amr_module, only: t0
+    use storm_module, only: flag_input_wrf
 
         implicit none
 
@@ -94,15 +108,29 @@ contains
         type(data_storm_type), intent(in out) :: storm
         integer, intent(in) :: storm_spec_type, log_unit
 
-    ! Local storage
+        ! Local storage
         integer, parameter :: l_file = 701
         integer :: i, j, iostatus
+
+        ! Flag of 1) ASCII input or 2) netCDF input
+        ! integer :: flag_input_wrf
         !character(len=4096) :: storm_data_path
+
+        ! Pointer for reading nc files (only netCDF input)
+        ! integer :: ifile_nc 
+        ! integer :: nfile_nc ! number of nc files
+
         real(kind=8) :: ll_lon, ll_lat, ur_lon, ur_lat, dx, dy
 
         ! Reading buffer variables
         character(len=100) :: dummy_read
         integer :: readsize
+
+        ! Counter variable
+        ! integer :: it
+        ! integer :: yy, mm, dd, hh, nn
+
+        
 
         ! Storm type only works on lat-long coordinate systems
         !if (coordinate_system /= 2) then
@@ -123,64 +151,136 @@ contains
         else
             storm%data_path = './'
         endif
-        storm_data_path = trim(storm%data_path) // "1d.con"
-        print *,'Reading storm config data file ',trim(storm_data_path)
-        open(unit=l_file,file=storm_data_path,status='old', &
-                action='read',iostat=iostatus)
-        if (iostatus /= 0) then
-            print *, "Error opening SuWAT config data file. status = ", iostatus
-            stop 
-        endif            
 
-        ! Read config file for num_lons, num_lats
-        ! Line 1 
-        read(l_file, *, iostat=iostatus) storm%num_lons, storm%num_lats
+        if (flag_input_wrf == 2) then
 
-        ! Allocate memory for lat & lon coords and u/v/p fields
-        allocate(storm%u_prev(storm%num_lons,storm%num_lats))
-        allocate(storm%v_prev(storm%num_lons,storm%num_lats))
-        allocate(storm%p_prev(storm%num_lons,storm%num_lats))
-        allocate(storm%u_next(storm%num_lons,storm%num_lats))
-        allocate(storm%v_next(storm%num_lons,storm%num_lats))
-        allocate(storm%p_next(storm%num_lons,storm%num_lats))
-        allocate(storm%u(storm%num_lons,storm%num_lats))
-        allocate(storm%v(storm%num_lons,storm%num_lats))
-        allocate(storm%p(storm%num_lons,storm%num_lats))
+            ! Monitor output
+            print *, "storm data format =====> *.swt"
 
-        ! Line 2, lower left corner and dy
-        read(l_file, *, iostat=iostatus) storm%ll_lon, storm%ll_lat, storm%dy
-        ! Line 3, upper right corner and dx
-        read(l_file, *, iostat=iostatus) storm%ur_lon, storm%ur_lat, storm%dx
-        close(l_file)
+            storm_data_path = trim(storm%data_path) // "1d.con"
+            print *,'Reading storm config data file ',trim(storm_data_path)
+            open(unit=l_file,file=storm_data_path,status='old', &
+                    action='read',iostat=iostatus)
+            if (iostatus /= 0) then
+                print *, "Error opening SuWAT config data file. status = ", iostatus
+                stop 
+            endif            
 
-        ! TEMPORARY
-        ! Shift the storm to match bathymetry
-        !storm%lat = storm%lat + 0.15
-        !storm%lon = storm%lon + 0.05
+            ! Read config file for num_lons, num_lats
+            ! Line 1 
+            read(l_file, *, iostat=iostatus) storm%num_lons, storm%num_lats
 
-        ! This is used to speed up searching for correct storm data
-        !  (using ASCII datafiles)
-        storm%last_storm_index = 0
+            ! Allocate memory for lat & lon coords and u/v/p fields
+            allocate(storm%u_prev(storm%num_lons,storm%num_lats))
+            allocate(storm%v_prev(storm%num_lons,storm%num_lats))
+            allocate(storm%p_prev(storm%num_lons,storm%num_lats))
+            allocate(storm%u_next(storm%num_lons,storm%num_lats))
+            allocate(storm%v_next(storm%num_lons,storm%num_lats))
+            allocate(storm%p_next(storm%num_lons,storm%num_lats))
+            allocate(storm%u(storm%num_lons,storm%num_lats))
+            allocate(storm%v(storm%num_lons,storm%num_lats))
+            allocate(storm%p(storm%num_lons,storm%num_lats))
 
-        ! Read in the first storm data snapshot as 'next'
-        !  and increment storm%last_storm_index to 1
-        call read_wrf_storm(storm,t0)
+            ! Line 2, lower left corner and dy
+            read(l_file, *, iostat=iostatus) storm%ll_lon, storm%ll_lat, storm%dy
+            ! Line 3, upper right corner and dx
+            read(l_file, *, iostat=iostatus) storm%ur_lon, storm%ur_lat, storm%dx
+            close(l_file)
 
-        ! Check if starting time of simulation
-        !  is before the first storm data snapshot
-        if (t0 < storm%t_next - eps) then
-            print *, "Simulation start time precedes storm data. Using clear skies."
-            if (DEBUG) print *, "t0=", t0, "first storm t:",storm%t_next
-            storm%t_prev = t0
-            storm%u_prev = 0
-            storm%v_prev = 0
-            storm%p_prev = ambient_pressure
-            storm%eye_prev = storm%eye_next
-        else
-            ! Read in the second storm data snapshot as 'next',
-            !  update 'prev' with old 'next' data,
-            !  and increment storm%last_storm_index to 2
+
+            ! This is used to speed up searching for correct storm data
+            !  (using ASCII datafiles)
+            storm%last_storm_index = 0
+
+            ! Read in the first storm data snapshot as 'next'
+            !  and increment storm%last_storm_index to 1
             call read_wrf_storm(storm,t0)
+
+            ! Check if starting time of simulation
+            !  is before the first storm data snapshot
+            if (t0 < storm%t_next - eps) then
+                print *, "Simulation start time precedes storm data. Using clear skies."
+                if (DEBUG) print *, "t0=", t0, "first storm t:",storm%t_next
+                storm%t_prev = t0
+                storm%u_prev = 0
+                storm%v_prev = 0
+                storm%p_prev = ambient_pressure
+                storm%eye_prev = storm%eye_next
+            else
+                ! Read in the second storm data snapshot as 'next',
+                !  update 'prev' with old 'next' data,
+                !  and increment storm%last_storm_index to 2
+                call read_wrf_storm(storm,t0)
+            endif
+
+        elseif (flag_input_wrf == 1) then
+
+            ! Monitor output
+            print *, "storm data format =====> *.nc"
+
+            ! Read data list of storm files in netCDF
+            storm_data_path = trim(storm%data_path) // "storm_list.data"
+
+            print *,'Reading storm list data file ',trim(storm_data_path)
+            open(unit=l_file,file=storm_data_path,status='old', &
+                    action='read',iostat=iostatus)
+            if (iostatus /= 0) then
+                print *, "Error opening storm list data file. status = ", iostatus
+                stop 
+            endif            
+
+            ! Skip headers
+            read(l_file,*)
+            read(l_file,*)
+            read(l_file,*)
+            read(l_file,*)
+            read(l_file,*)
+
+            ! Read number of files
+            read(l_file,*) nfile_nc
+            if (DEBUG) print *, "Number of storm files: ",nfile_nc
+            
+            ! Allocate array of file list
+            allocate(ncfilelist(nfile_nc))
+
+            ! Read file lists
+            do ifile_nc = 1,nfile_nc
+                read(l_file,'(100a)') ncfilelist(ifile_nc)
+                if (DEBUG) print *, trim( ncfilelist(ifile_nc) )
+            enddo
+
+
+            ! Initialize loop counter
+            it = 1
+            ifile_nc = 1
+            ! Initialize date (start from 0000/00/01 01:00)
+            yy = 0
+            mm = 0
+            dd = 1
+            hh = 0
+            nn = 0
+
+            ! Read in the first storm data snapshot as 'next'
+            ! and increment storm%lalst_storm_index to 1
+            call read_wrf_storm_nc( storm, t0 )
+
+            ! Check if starting time of simulation
+            !  is before the first storm data snapshot
+            if (t0 < storm%t_next - eps) then
+                print *, "Simulation start time precedes storm data. Using clear skies."
+                if (DEBUG) print *, "t0=", t0, "first storm t:",storm%t_next
+                storm%t_prev = t0
+                storm%u_prev = 0
+                storm%v_prev = 0
+                storm%p_prev = ambient_pressure
+                storm%eye_prev = storm%eye_next
+            else
+                ! Read in the second storm data snapshot as 'next',
+                !  update 'prev' with old 'next' data,
+                !  and increment storm%last_storm_index to 2
+                call read_wrf_storm_nc( storm, t0  )
+            endif
+
         endif
 
         ! Initialize current storm module data
@@ -316,7 +416,209 @@ contains
         close(data_file) 
 
     end subroutine read_wrf_storm_file
-   
+
+    ! ==========================================================================
+    ! read_wrf_storm_nc()
+    ! Reads storm fields for next time snapshot
+    ! NetCDF format only
+    ! ==========================================================================
+
+    subroutine read_wrf_storm_nc( storm, t )
+
+        use geoclaw_module, only: ambient_pressure
+        use netcdf
+
+        implicit none
+
+        ! Subroutine I/O
+        type(data_storm_type), intent(in out) :: storm
+        real(kind=8) :: lowest_p
+        real(kind=8), intent(in) :: t
+        ! integer, intent(in out) :: yy, mm, dd, hh, nn
+        ! integer, intent(in out) :: it          ! time step
+        ! integer, intent(in out) :: ifile_nc    ! file ID to be read
+        ! character(len=100), intent(in) :: ncfilelist(:)
+
+        ! Reading buffer variables
+        integer :: timestamp
+
+        ! dimension
+        integer :: nx, ny, nt
+        character(len=1024) :: f_in
+        real(kind=4), allocatable :: lon(:), lat(:), timelap(:)
+        real(kind=4), allocatable :: psea(:,:,:)
+        real(kind=4), allocatable :: u10(:,:,:), v10(:,:,:)
+        ! parameters for read
+        integer :: ncid, varid, dimid
+        integer :: start_nc(3), count_nc(3)
+        real(kind=4) :: scale_factor, add_offset
+
+        ! netcdf filename  
+        f_in = ncfilelist(ifile_nc)
+        call check_ncstatus( nf90_open( trim( f_in ), nf90_nowrite, ncid) )
+                        
+
+        ! number of array
+        ! -- lon
+        call check_ncstatus( nf90_inq_dimid(ncid, 'lon', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=nx) ) ! nx is determined
+        allocate(lon(nx))
+        call check_ncstatus( nf90_get_var(ncid, dimid, lon) )
+        ! -- lat
+        call check_ncstatus( nf90_inq_dimid(ncid, 'lat', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=ny) )
+        allocate(lat(ny))
+        call check_ncstatus( nf90_get_var(ncid, dimid, lat) )
+        ! -- timelap
+        call check_ncstatus( nf90_inq_dimid(ncid, 'time', dimid) )
+        call check_ncstatus( nf90_inquire_dimension(ncid, dimid, len=nt) )
+        allocate(timelap(nt))
+        call check_ncstatus( nf90_get_var(ncid, dimid, timelap) )
+
+        ! allocate
+        allocate(psea(nx,ny,nt))
+        allocate(u10(nx,ny,nt), v10(nx,ny,nt))
+        
+        ! process done in first step
+        if(it==1 .and. ifile_nc==1)then
+            ! allocate storm%xxx
+            storm%num_lons = nx ! assign number of longitude to nx
+            storm%num_lats = ny
+
+            ! allocate storm parameters (only first time)
+            allocate(storm%u_prev(storm%num_lons,storm%num_lats))
+            allocate(storm%v_prev(storm%num_lons,storm%num_lats))
+            allocate(storm%p_prev(storm%num_lons,storm%num_lats))
+            allocate(storm%u_next(storm%num_lons,storm%num_lats))
+            allocate(storm%v_next(storm%num_lons,storm%num_lats))
+            allocate(storm%p_next(storm%num_lons,storm%num_lats))
+            allocate(storm%u(storm%num_lons,storm%num_lats))
+            allocate(storm%v(storm%num_lons,storm%num_lats))
+            allocate(storm%p(storm%num_lons,storm%num_lats))
+
+            ! lower left corner and dy
+            storm%ll_lon = minval(lon)
+            storm%ll_lat = minval(lat)
+            ! upper right corner and dx
+            storm%ur_lon = maxval(lon)
+            storm%ur_lat = maxval(lat)
+            ! grid size dx and dy
+            storm%dx = abs( lon(2) - lon(1) )
+            storm%dy = abs( lat(2) - lat(1) )
+
+            ! This is used to speed up searching for correct storm data
+            !  (using ASCII datafiles)
+            storm%last_storm_index = 0
+
+        endif
+
+        ! ----- contents of subroutine read_wrf_storm()----------------------------------------------
+        ! Overwrite older storm states with newer storm states
+        storm%t_prev = storm%t_next
+        storm%u_prev = storm%u_next 
+        storm%v_prev = storm%v_next 
+        storm%p_prev = storm%p_next 
+        storm%eye_prev = storm%eye_next
+
+        ! Current time t currently unused in favor of storm%last_storm_index.
+        ! This should probably be changed in the future.
+        
+        ! read variables
+        ! indices
+        start_nc = [1,1,1]
+        count_nc = [nx,ny,nt]
+
+        ! -- psea
+        call check_ncstatus( nf90_inq_varid(ncid, "psea", varid) )
+        call check_ncstatus( nf90_get_var(ncid, varid, psea, start=start_nc, count=count_nc) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "scale_factor", scale_factor) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "add_offset", add_offset) )
+        psea(:,:,:) = psea(:,:,:)*scale_factor + add_offset
+        ! -- u10
+        call check_ncstatus( nf90_inq_varid(ncid, "u", varid) )
+        call check_ncstatus( nf90_get_var(ncid, varid, u10, start=start_nc, count=count_nc) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "scale_factor", scale_factor) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "add_offset", add_offset) )
+        u10(:,:,:) = u10(:,:,:)*scale_factor + add_offset
+        ! -- v10
+        call check_ncstatus( nf90_inq_varid(ncid, "v", varid) )
+        call check_ncstatus( nf90_get_var(ncid, varid, v10, start=start_nc, count=count_nc) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "scale_factor", scale_factor) )
+        call check_ncstatus( nf90_get_att(ncid, varid, "add_offset", add_offset) )
+        v10(:,:,:) = v10(:,:,:)*scale_factor + add_offset
+        ! close nc file
+        call check_ncstatus( nf90_close(ncid) )
+
+        ! ----- contents of subroutine read_wrf_storm_data
+        !
+
+        ! need flip up-side-down
+        storm%p_next = psea(:,ny:1:-1,it)
+        storm%u_next = u10(:,ny:1:-1,it)
+        storm%v_next = v10(:,ny:1:-1,it)
+
+        ! Convert pressure units: mbar (hPa) to Pa
+        ! storm%p_next = storm%p_next * 1.0e2 ! NC file uses Pa
+        ! Estimate storm center location based on lowest pressure
+        ! (only the array index is saved)
+        storm%eye_next = MINLOC(storm%p_next)
+        ! If no obvious low pressure area, set storm center to 0 instead
+        lowest_p = storm%p_next(storm%eye_next(1),storm%eye_next(2))
+        if (lowest_p > ambient_pressure*0.99) then
+            storm%eye_next = [0,0]
+        endif 
+
+        ! Update number of storm snapshots read in
+        storm%last_storm_index = storm%last_storm_index + 1
+        if (DEBUG) print *, "last_storm_index=", storm%last_storm_index
+
+        ! timestamp
+        timestamp = date_to_seconds(yy,mm,dd,hh,nn)
+        storm%t_next = timestamp
+        
+        ! --- print for check
+        write(*,*) "------------------------------------------------------------------"
+        write(*,*) "Storm information"
+        write(*,*) "Time: ", dd, " [day]", hh, " [hour]", nn, " [min]"
+        write(*,*) "nx: ",nx, "ny: ",ny, "nt: ", nt
+        write(*,*) "dx and dy :",storm%dx, storm%dy
+        write(*,*) "tmin: ",timelap(lbound(timelap)), "tmax: ",timelap(ubound(timelap))
+        write(*,*) "xll: ",minval(lon), "xur: " ,maxval(lon)
+        write(*,*) "yll: ",minval(lat), "yur: ",maxval(lat)
+        write(*,*) "iteration: ",it, "storm%t_next: ",storm%t_next
+        write(*,*) "max P: ", maxval(storm%p_next), "min P: ", minval(storm%p_next)
+        write(*,*) "max U10: ",maxval(storm%u_next), "min U10: ",minval(storm%u_next)
+        write(*,*) "max V10: ", maxval(storm%v_next), "min V10: ",minval(storm%v_next)
+        write(*,*) "------------------------------------------------------------------"
+
+        ! renew loop counter
+        it = it + 1
+        ! renew time stamp
+        hh = hh + 1
+        if(hh>=24)then
+            hh = 0
+            dd = dd + 1
+        endif
+
+        ! reset loop counter
+        if(it==nt)then
+            if (DEBUG) print *, "EOF of netCDF file and proceed to next file ..."
+            it = 1
+            ifile_nc = ifile_nc + 1
+        endif
+
+    end subroutine read_wrf_storm_nc
+
+    subroutine check_ncstatus( status )
+        use netcdf
+        integer, intent (in) :: status
+        if(status /= nf90_noerr) then 
+        print *, trim(nf90_strerror(status))
+        stop "Something went wrong while reading ncfile."
+        end if
+    end subroutine check_ncstatus
+
+
     ! ==========================================================================
     !  read_wrf_storm_data()
     !    Reads storm fields for next time snapshot
@@ -508,6 +810,8 @@ contains
 
         use geoclaw_module, only: rad2deg  
 
+        use storm_module, only: flag_input_wrf
+
 
         implicit none
 
@@ -527,6 +831,8 @@ contains
         real(kind=8) :: x, y
         integer :: i,j,k,l
 
+        
+
         if (t < storm%t_prev - eps) then
         print *, "Simulation time precedes storm data in memory. &
             Race condition?"
@@ -540,7 +846,15 @@ contains
         ! update all storm data, including value of t_next
         if (DEBUG) print *,"loading new storm snapshot ",&
                         "t=",t,"old t_next=",storm%t_next
-        call read_wrf_storm(storm,t)
+
+        print *, "flag = ",flag_input_wrf
+        print *, "it = ",it, " ifile_nc = ",ifile_nc
+        print *, "yymmddhhnn = ", yy ,mm, dd, hh, nn
+        if (flag_input_wrf==2)then
+            call read_wrf_storm(storm,t)
+        elseif (flag_input_wrf==1)then
+            call read_wrf_storm_nc( storm, t )
+        endif
         if (DEBUG) print *,"new t_next=",storm%t_next
         ! If storm data ends, the final storm state is used.
         enddo
@@ -729,6 +1043,7 @@ contains
         storm%p = storm%p_prev + &
                 (storm%p_next - storm%p_prev) * alpha
 
+
     end subroutine storm_inplace_interpolate
 
     ! ==========================================================================
@@ -779,7 +1094,7 @@ contains
                     (storm%p_next(ni,nj)-storm%p_prev(pi,pj)) * alpha
             enddo
         enddo
-                
+               
 
     end subroutine storm_shift_interpolate
 

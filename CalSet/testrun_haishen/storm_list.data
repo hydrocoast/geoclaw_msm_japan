@@ -1,0 +1,11 @@
+# =========================================================#
+# LIST OF STORM DATA FILES                                 #
+# (from GSM forecast)                                      #
+# =========================================================#
+
+4
+/home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/ncfile_daily/2020/0904.nc
+/home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/ncfile_daily/2020/0905.nc
+/home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/ncfile_daily/2020/0906.nc
+/home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/ncfile_daily/2020/0907.nc
+
