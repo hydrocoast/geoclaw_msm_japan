@@ -11,7 +11,7 @@ url_target="${url_parent}/${str_year}/${str_date}.nc"
 dir_download="../ncfile_daily/${str_year}"
 
 if [ ! -d $dir_download ]; then
-    mkdir $dir_download
+    mkdir -p $dir_download
 fi
 
 wget -P $dir_download/  $url_target
