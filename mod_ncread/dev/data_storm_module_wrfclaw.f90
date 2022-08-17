@@ -594,8 +594,6 @@ contains
             &    *cos(deg2rad*lon(storm%eye_next(1))&
             &        -deg2rad*lon(storm%eye_prev(1)))
             storm_dist = earth_radius * acos( a1 + a2 )
-
-            print *, a1, a2
             print *, "storm distance = ",storm_dist
             if (storm_dist > storm_dist_threshold)then
                 print *, "another storm appeared ..."
