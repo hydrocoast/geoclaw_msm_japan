@@ -430,7 +430,7 @@ contains
 
     subroutine read_wrf_storm_nc( storm, t )
 
-        use geoclaw_module, only: ambient_pressure, earth_radius
+        use geoclaw_module, only: ambient_pressure, earth_radius, deg2rad
         use netcdf
 
         implicit none
@@ -586,10 +586,16 @@ contains
         if(storm%eye_prev(1)/=0 .or. storm%eye_prev(2)/=0)then
             ! print *, storm%eye_prev
             ! print *, storm%eye_next
-            a1 = sin(lat(storm%eye_prev(2)))*sin(lat(storm%eye_next(2)))
-            a2 = cos(lat(storm%eye_prev(2)))*cos(lat(storm%eye_next(2)))&
-            &    *cos(lon(storm%eye_next(1))-lon(storm%eye_prev(1)))
+            a1 = sin(deg2rad*lat(storm%eye_prev(2)))&
+            &    *sin(deg2rad*lat(storm%eye_next(2)))
+
+            a2 = cos(deg2rad*lat(storm%eye_prev(2)))&
+            &    *cos(deg2rad*lat(storm%eye_next(2)))&
+            &    *cos(deg2rad*lon(storm%eye_next(1))&
+            &        -deg2rad*lon(storm%eye_prev(1)))
             storm_dist = earth_radius * acos( a1 + a2 )
+
+            print *, a1, a2
             print *, "storm distance = ",storm_dist
             if (storm_dist > storm_dist_threshold)then
                 print *, "another storm appeared ..."
