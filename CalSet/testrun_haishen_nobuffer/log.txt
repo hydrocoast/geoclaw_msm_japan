@@ -1,0 +1,477 @@
+touch mod/data_storm_module_wrfclaw.mod; ifort -c -cpp mod/data_storm_module_wrfclaw.f90 -module mod -I-I/usr/local/netcdf-ifort/4.5.4/include -I-I/usr/local/netcdf-ifort/4.5.4/include -I./mod/ -I/home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/ -I/home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/ -I/home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/multilayer/ -I/home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/surge/ -L/usr/local/netcdf-ifort/4.5.4/lib -fopenmp -g -CB -fpe0 -traceback -nogen-interface -DNETCDF -L/usr/local/netcdf-ifort/4.5.4/lib -lnetcdff -L/usr/lib -I/usr/include: -lnetcdf -lnetcdf -lm -I/usr/local/netcdf-ifort/4.5.4/include -DNDEBUG -DpgiFortran -L/usr/lib -I/usr/include:   -o mod/data_storm_module_wrfclaw.o
+ifort     /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/amr_module.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/regions_module.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/adjoint_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/utility_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/geoclaw_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/topo_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/qinit_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/refinement_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/fixedgrids_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/fgmax_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/surge/model_storm_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/friction_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/adjointsup_module.o ./mod/data_storm_module_wrfclaw.o ./mod/storm_module_wrfclaw.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/gauges_module.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/multilayer/multilayer_module.o     /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/prefilp.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/trimbd.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/bound.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/intfil.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/flagregions2.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/quick_sort1.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/quick_sort_reals.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/estdt.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/check4nans.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/init_iflags.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/igetsp.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/reclam.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/birect.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/cleanup.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/colate2.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/bufnst2.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/flagger.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/fixcapaq.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/flglvl2.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/fluxad.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/fluxsv.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/grdfit2.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/moment.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/nestck2.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/prepc.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/prepf.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/projec2.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/signs.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/findcut.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/smartbis.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/putnod.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/putsp.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/regrid.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/setuse.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/stst1.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/nodget.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/basic.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/outval.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/copysol.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/outvar.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/outtre.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/domain.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/cellave.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/fdisc.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/fss.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/zeroin.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/setflags.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/shiftset2.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/conck.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/domshrink.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/domprep.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/domup.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/domcopy.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/setdomflags.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/setIndices.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/coarseGridFlagSet.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/addflags.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/baseCheck.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/drivesort.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/flagcheck.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/domgrid.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/setPhysBndryFlags.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/griddomup.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/griddomcopy.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/griddomshrink.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/intcopy.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/preintcopy.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/icall.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/preicall.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/inlinelimiter.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/cstore.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/saveqc.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/opendatafile.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/init_bndryList.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/resize_bndryList.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/init_nodes.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/restrt_nodes.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/resize_nodes.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/init_alloc.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/restrt_alloc.o /home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/resize_alloc.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/setprob.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/qinit.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/topo_update.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/cellgridintegrate2.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/topointegral.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/bilinearintegral.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/stepgrid.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/src2.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/src1d.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/step2.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/flux2fw.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/qad.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/valout.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/filval.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/filpatch.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/bc2amr.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/update.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/setaux.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/flag2refine2.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/b4step2.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/upbnd.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/tick.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/setgrd.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/gfixup.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/ginit.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/getmaxspeed.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/advanc.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/amr2.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/fgmax_read.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/fgmax_frompatch.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/fgmax_interp.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/fgmax_values.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/fgmax_finalize.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/check.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/restrt.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/errest.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/errf1.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/coarsen.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/auxcoarsen.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/prepbigstep.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/prepregstep.o /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/set_eta_init.o /home/fukui/softwares/clawpack_src/clawpack/riemann/src/rpn2_geoclaw.o /home/fukui/softwares/clawpack_src/clawpack/riemann/src/rpt2_geoclaw.o /home/fukui/softwares/clawpack_src/clawpack/riemann/src/geoclaw_riemann_utils.o ./src/outmsh.o -I-I/usr/local/netcdf-ifort/4.5.4/include -I-I/usr/local/netcdf-ifort/4.5.4/include -I./mod/ -I/home/fukui/softwares/clawpack_src/clawpack/amrclaw/src/2d/ -I/home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/ -I/home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/multilayer/ -I/home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/surge/ -L/usr/local/netcdf-ifort/4.5.4/lib -L/usr/local/netcdf-ifort/4.5.4/lib -lnetcdff -L/usr/lib -I/usr/include: -lnetcdf -lnetcdf -lm -I/usr/local/netcdf-ifort/4.5.4/include -DNDEBUG -DpgiFortran -L/usr/lib -I/usr/include: -fopenmp -g -o xgeoclaw                 
+make output -f Makefile /home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/Makefile.geoclaw /home/fukui/softwares/clawpack_src/clawpack/clawutil/src/Makefile.common
+make[1]: Entering directory '/home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/testrun_haishen_nobuffer'
+rm -f .output
+python /home/fukui/softwares/clawpack_src/clawpack/clawutil/src/python/clawutil/runclaw.py xgeoclaw                  _output                \
+True None . False False None
+Reading data file: claw.data
+         first 5 lines are comments and will be skipped
+Reading data file: amr.data
+         first 5 lines are comments and will be skipped
+  
+ Running amrclaw ...  
+  
+Reading data file: geoclaw.data
+         first 5 lines are comments and will be skipped
+Reading data file: refinement.data
+         first 5 lines are comments and will be skipped
+Reading data file: dtopo.data
+         first 5 lines are comments and will be skipped
+Reading data file: topo.data
+         first 5 lines are comments and will be skipped
+  
+ Reading topography file  
+ /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/top
+ o/gebco_2020_n60.0_s0.0_w105.0_e165.0_landmask.asc                     
+Reading data file: qinit.data
+         first 5 lines are comments and will be skipped
+   qinit_type = 0, no perturbation
+Reading data file: fixed_grids.data
+         first 5 lines are comments and will be skipped
+Reading data file: friction.data
+         first 5 lines are comments and will be skipped
+Reading data file: multilayer.data
+         first 5 lines are comments and will be skipped
+Reading data file: surge.data
+         first 5 lines are comments and will be skipped
+ storm data format =====> *.nc
+ Reading storm list data file 
+ /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/tes
+ trun_haishen_nobuffer/./storm_list.data
+ Number of storm files:            4
+ /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/ncfile_dai
+ ly/2020/0904.nc
+ /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/ncfile_dai
+ ly/2020/0905.nc
+ /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/ncfile_dai
+ ly/2020/0906.nc
+ /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/ncfile_dai
+ ly/2020/0907.nc
+ it=          13
+ Make buffer layer for storm
+ Make buffer layer for storm
+ Make buffer layer for storm
+ last_storm_index=           1
+ ------------------------------------------------------------------
+ Storm information
+ Time:            1  [day]           0  [hour]           0  [min]
+ nx:          481 ny:          505 nt:           24
+ dx and dy :  6.250000000000000E-002  4.999923706054688E-002
+ tmin:   0.0000000E+00 tmax:    23.00000    
+ xll:    120.0000     xur:    150.0000    
+ yll:    22.40000     yur:    47.60000    
+ iteration:           13 storm%t_next:   0.000000000000000E+000
+ storm eye:    133.2500       148.3125       33.00000       45.05000    
+ max P:    102088.531250000      min P:    99851.3750000000     
+ max U10:    8.37308883666992      min U10:   -25.1559638977051     
+ max V10:    12.2324161529541      min V10:   -13.6146793365479     
+ ------------------------------------------------------------------
+ it=          14
+ Make buffer layer for storm
+ Make buffer layer for storm
+ Make buffer layer for storm
+ last_storm_index=           2
+ ------------------------------------------------------------------
+ Storm information
+ Time:            1  [day]           1  [hour]           0  [min]
+ nx:          481 ny:          505 nt:           24
+ dx and dy :  6.250000000000000E-002  4.999923706054688E-002
+ tmin:   0.0000000E+00 tmax:    23.00000    
+ xll:    120.0000     xur:    150.0000    
+ yll:    22.40000     yur:    47.60000    
+ iteration:           14 storm%t_next:    3600.00000000000     
+ storm eye:    133.0625       148.3125       37.15000       24.95000    
+ max P:    102050.000000000      min P:    99787.6171875000     
+ max U10:    8.06727886199951      min U10:   -25.5596332550049     
+ max V10:    11.3822631835938      min V10:   -13.3333339691162     
+ ------------------------------------------------------------------
+ Storm is set by WRF Output !!!
+Reading data file: regions.data
+         first 5 lines are comments and will be skipped
+Reading data file: flagregions.data
+         first 5 lines are comments and will be skipped
+Reading data file: gauges.data
+         first 5 lines are comments and will be skipped
+Reading data file: fgmax_grids.data
+         first 5 lines are comments and will be skipped
+ +++ fgbb:    121.625000000000        140.450000000000     
+   23.0750000000000        36.6000000000000     
+ +++ fgll:    121.625000000000        23.0750000000000              754
+         542
+ +++ fg%x(npts), fg%y(1):    140.450000000000        23.0750000000000     
+ +++ fgbb:    128.175000000000        139.624999540000     
+   29.6750000000000        35.9249997500000     
+ +++ fgll:    128.175000000000        29.6750000000000             1375
+         751
+ +++ fg%x(npts), fg%y(1):    139.624999540000        29.6750000000000     
+ +++ fgbb:    129.333300000000        130.591633430000     
+   30.3166700000000        32.2000034840000     
+ +++ fgll:    129.333300000000        30.3166700000000              454
+         679
+ +++ fg%x(npts), fg%y(1):    130.591633430000        30.3166700000000     
+ +++ fgbb:    128.383300000000        130.691633520000     
+   32.2166700000000        33.5166701040000     
+ +++ fgll:    128.383300000000        32.2166700000000              832
+         469
+ +++ fg%x(npts), fg%y(1):    130.691633520000        32.2166700000000     
+Reading data file: adjoint.data
+         first 5 lines are comments and will be skipped
+ rnode allocated...
+ node allocated...
+ listOfGrids allocated...
+ Storage allocated...
+ bndList allocated...
+Gridding level   1 at t =  0.000000E+00:    64 grids with       90000 cells
+   Setting initial dt to   0.500000000000000     
+  max threads set to           16
+  
+ Done reading data, starting computation ...  
+  
+ Total mass at initial time:   1.911255704593112E+016
+GEOCLAW: Frame    0 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .183E-01  dt = 0.5000E+00  final t =  0.00
+GEOCLAW: Frame    1 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame    2 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame    3 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame    4 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame    5 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame    6 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame    7 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame    8 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame    9 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   10 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   11 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   12 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   13 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   14 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   15 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   16 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   17 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   18 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   19 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   20 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   21 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   22 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   23 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   24 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   25 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   26 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   27 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   28 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   29 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   30 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   31 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.00
+GEOCLAW: Frame   32 output files done at time t =  0.00
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   33 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   34 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   35 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   36 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   37 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   38 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   39 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   40 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   41 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   42 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   43 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   44 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   45 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   46 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   47 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   48 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   49 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   50 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   51 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   52 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   53 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   54 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   55 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   56 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   57 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   58 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   59 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   60 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   61 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   62 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   63 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   64 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   65 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   66 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   67 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   68 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   69 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   70 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   71 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   72 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   73 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   74 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   75 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   76 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   77 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   78 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   79 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   80 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   81 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   82 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   83 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   84 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   85 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   86 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   87 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   88 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   89 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   90 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   91 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   92 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   93 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   94 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.01
+GEOCLAW: Frame   95 output files done at time t =  0.01
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.02
+GEOCLAW: Frame   96 output files done at time t =  0.02
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.02
+GEOCLAW: Frame   97 output files done at time t =  0.02
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.02
+GEOCLAW: Frame   98 output files done at time t =  0.02
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.02
+GEOCLAW: Frame   99 output files done at time t =  0.02
+
+ AMRCLAW: level  1  CFL = .500E+00  dt = 0.1367E+02  final t =  0.02
+GEOCLAW: Frame  100 output files done at time t =  0.02
+
+ Done integrating to time    1353.56588689854     
+ Writing to file fgmax0001.txt                 
+ Writing to file fgmax0002.txt                 
+ Writing to file fgmax0003.txt                 
+ Writing to file fgmax0004.txt                 
+See fort.amr for more info on this run and memory usage
+ 
+============================== Timing Data ==============================
+ 
+Integration Time (stepgrid + BC + overhead)
+Level           Wall Time (seconds)    CPU Time (seconds)   Total Cell Updates
+  1                    27.131                426.870            0.900E+07
+  2                    22.139                351.789            0.146E+08
+  3                     0.000                  0.000            0.000E+00
+  4                     0.000                  0.000            0.000E+00
+total                  49.270                778.659            0.236E+08
+ 
+All levels:
+stepgrid               48.937                773.765    
+BC/ghost cells          0.273                  3.911
+Regridding              0.666                 10.581  
+Output (valout)        57.920                350.070  
+ 
+Total time:           114.575               1237.028  
+Using 16 thread(s)
+ 
+Note: The CPU times are summed over all threads.
+      Total time includes more than the subroutines listed above
+Note: timings are also recorded for each output step
+      in the file timing.csv.
+ 
+=========================================================================
+ 
+==> runclaw: Will take data from  /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/testrun_haishen_nobuffer
+==> runclaw: Will write output to  /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/testrun_haishen_nobuffer/_output
+==> runclaw: Removing all old fort/gauge files in  /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/testrun_haishen_nobuffer/_output
+
+==> Running with command:
+    /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/testrun_haishen_nobuffer/xgeoclaw
+==> runclaw: Done executing /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/testrun_haishen_nobuffer/xgeoclaw via clawutil.runclaw.py
+==> runclaw: Output is in  /home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/testrun_haishen_nobuffer/_output
+make[1]: Nothing to be done for '/home/fukui/softwares/clawpack_src/clawpack/geoclaw/src/2d/shallow/Makefile.geoclaw'.
+make[1]: Nothing to be done for '/home/fukui/softwares/clawpack_src/clawpack/clawutil/src/Makefile.common'.
+make[1]: Leaving directory '/home/fukui/project/F08_sProject_geoclaw_msm_japan/geoclaw_msm_japan/CalSet/testrun_haishen_nobuffer'

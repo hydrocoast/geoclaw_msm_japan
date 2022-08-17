@@ -417,7 +417,7 @@ def setgeo(rundata):
     refine_data.speed_tolerance = 1.0 #[0.25, 0.50, 0.75, 1.00]
 
     refine_data.deep_depth = 3.0e3
-    refine_data.max_level_deep = 2
+    refine_data.max_level_deep = 1
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==

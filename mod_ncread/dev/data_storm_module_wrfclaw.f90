@@ -430,7 +430,7 @@ contains
 
     subroutine read_wrf_storm_nc( storm, t )
 
-        use geoclaw_module, only: ambient_pressure
+        use geoclaw_module, only: ambient_pressure, earth_radius
         use netcdf
 
         implicit none
@@ -457,6 +457,11 @@ contains
         integer :: ncid, varid, dimid
         integer :: start_nc(3), count_nc(3)
         real(kind=4) :: scale_factor, add_offset
+        ! parameters for detecting storm eyes
+        real(kind=8), parameter :: storm_dist_threshold = 1000.0e3 ! [m]
+        real(kind=8) :: a1, a2, storm_dist
+        
+
 
         ! netcdf filename  
         f_in = ncfilelist(ifile_nc)
@@ -507,9 +512,11 @@ contains
             ! upper right corner and dx
             storm%ur_lon = maxval(lon)
             storm%ur_lat = maxval(lat)
+            lat = lat(ny:1:-1)
+
             ! grid size dx and dy
             storm%dx = abs( lon(2) - lon(1) )
-            storm%dy = abs( lat(2) - lat(1) )
+            storm%dy = abs( lat(ny) - lat(ny-1) )
 
             ! This is used to speed up searching for correct storm data
             !  (using ASCII datafiles)
@@ -556,16 +563,11 @@ contains
 
         ! ----- contents of subroutine read_wrf_storm_data
         !
-
-        ! need flip up-side-down
-        storm%p_next = psea(:,ny:1:-1,it)
-        storm%u_next = u10(:,ny:1:-1,it)
-        storm%v_next = v10(:,ny:1:-1,it)
-
-        ! add buffer layer
-
         
-
+        ! make u10 v10 P filled with U10, V10 = 0 and P = 1013
+        call make_storm_buffer_layer(storm,psea(:,:,it),nx,ny,1,lon,lat)
+        call make_storm_buffer_layer(storm,u10(:,:,it),nx,ny,2,lon,lat)
+        call make_storm_buffer_layer(storm,v10(:,:,it),nx,ny,3,lon,lat)
 
         ! Convert pressure units: mbar (hPa) to Pa
         ! storm%p_next = storm%p_next * 1.0e2 ! NC file uses Pa
@@ -577,6 +579,23 @@ contains
         if (lowest_p > ambient_pressure*0.99) then
             storm%eye_next = [0,0]
         endif 
+
+        ! (temporary)
+        ! Calculate distance b/w two typhoons
+        ! dist=rcos-(sin(y1)sin(y2)+cos(y1)cos(y2)cos(x2-x1))
+        if(storm%eye_prev(1)/=0 .or. storm%eye_prev(2)/=0)then
+            ! print *, storm%eye_prev
+            ! print *, storm%eye_next
+            a1 = sin(lat(storm%eye_prev(2)))*sin(lat(storm%eye_next(2)))
+            a2 = cos(lat(storm%eye_prev(2)))*cos(lat(storm%eye_next(2)))&
+            &    *cos(lon(storm%eye_next(1))-lon(storm%eye_prev(1)))
+            storm_dist = earth_radius * acos( a1 + a2 )
+            print *, "storm distance = ",storm_dist
+            if (storm_dist > storm_dist_threshold)then
+                print *, "another storm appeared ..."
+                storm%eye_next = [0,0]
+            endif
+        endif
 
         ! Update number of storm snapshots read in
         storm%last_storm_index = storm%last_storm_index + 1
@@ -596,6 +615,11 @@ contains
         write(*,*) "xll: ",minval(lon), "xur: " ,maxval(lon)
         write(*,*) "yll: ",minval(lat), "yur: ",maxval(lat)
         write(*,*) "iteration: ",it, "storm%t_next: ",storm%t_next
+        if(storm%eye_next(1)/=0 .and. storm%eye_next(2)/=0)then
+            write(*,*) "storm eye: ",lon(storm%eye_next(1)),lat(storm%eye_next(2))
+        else
+            write(*,*) "storm eye: N/A"
+        endif
         write(*,*) "max P: ", maxval(storm%p_next), "min P: ", minval(storm%p_next)
         write(*,*) "max U10: ",maxval(storm%u_next), "min U10: ",minval(storm%u_next)
         write(*,*) "max V10: ", maxval(storm%v_next), "min V10: ",minval(storm%v_next)
@@ -628,6 +652,224 @@ contains
         end if
     end subroutine check_ncstatus
 
+    subroutine make_storm_buffer_layer(storm,storm_field,nx,ny,flag,x,y)
+
+        use geoclaw_module, only: ambient_pressure
+
+        implicit none
+
+        ! storm field (pressure or wind)
+        type(data_storm_type), intent(in out) :: storm
+        integer, intent(in out) :: nx, ny
+        real(kind=4), intent(in out) :: storm_field(nx,ny)
+        real(kind=4) :: storm_field_wrk(nx,ny)
+
+        ! coordinate
+        real(kind=4), intent(in out) :: x(nx),y(ny)
+
+        ! flag determining pressure (1) or wind (2)
+        integer :: flag
+        real(kind=4) :: val
+
+        ! settings about margin
+        integer :: nn, ninner, nbuffer, nghost, i, j
+
+        ! --- monitor output
+        ! print *, "Make buffer layer for storm"
+
+        ! 
+        nn = nint( max(nx,ny) * 0.1d0 ) ! 10% of number of meshes
+        nbuffer = nint( nn * 0.33d0 ) ! quotient of 3
+        ninner  = nn-nbuffer
+        nghost =  nint( max(nx,ny) * 0.1d-1 ) ! 1%
+
+        ! --- for debug only
+        ! print *, "nn :",nn
+        ! print *, "ninner :",ninner, " nbuffer: ",nbuffer
+        ! print *, "nghost :", nghost
+
+        ! print *, " SLP(100,100) =",storm_field(100,100)
+        ! print *, "x = ",x(100),"y = ",y(100)
+
+        if(flag==1)then
+            val = ambient_pressure ! pressure
+        else
+            val = 0.0d0            ! wind speed
+        endif
+
+        ! fill with clear sky condition
+        storm_field_wrk(:,:) = val
+                
+        ! pickup core region
+        storm_field_wrk(nn+1:nx-nn, nn+1:ny-nn) &
+        = storm_field(nn+1:nx-nn, nn+1:ny-nn)
+        ! storm_field_wrk=storm_field
+
+        ! subroutine of linear interpolation (for buffer layer)
+        call interp2(storm_field_wrk,x,y, nn, ninner, nbuffer,nx,ny)
+
+        ! fill margin with the same value as the edge of buffer
+        ! --- WEST
+        do i = 1,nghost
+            do j = 1,ny
+                storm_field_wrk(i,j) = storm_field_wrk(nghost+1,j)
+            enddo
+        enddo
+        ! --- EAST
+        do i = nx-nghost+1,nx
+            do j = 1,ny
+            storm_field_wrk(i,j) & 
+                       = storm_field_wrk(nx-nghost,j)
+            enddo
+        enddo
+        ! --- SOUTH
+        do i = 1,nx
+            do j = 1,nghost
+            storm_field_wrk(i,j) = storm_field_wrk(i,nghost+1)
+            enddo
+        enddo
+        ! --- NORTH
+        do i = 1,nx
+            do j = nx-nghost+1,nx
+            storm_field_wrk(i,j) = storm_field_wrk(i,ny-nghost)
+            enddo
+        enddo
+
+        if(flag==1)then
+            storm%p_next = storm_field_wrk
+        elseif(flag==2)then
+            storm%u_next = storm_field_wrk
+        elseif(flag==3)then
+            storm%v_next = storm_field_wrk
+        endif
+
+    end subroutine make_storm_buffer_layer
+
+    subroutine interp2(array, x, y, nn, ninner, nbuffer,nx,ny)
+
+        implicit none
+
+        integer, intent(in) :: nn, ninner, nbuffer, nx, ny
+        integer :: is,ie,js,je,flag_dir
+        real(kind=4), intent(in out) :: array(nx,ny)    
+        real(kind=4), intent(in out) :: x(nx),y(ny)
+
+        ! linear interpolation in buffer layer
+        !----------------------------------------------------------
+        ! --- WEST
+        is = ninner+1; ie = nn+1
+        js = nn+1;     je = ny-nn
+        flag_dir = 1
+        call interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+        ! --- EAST
+        is = nx-nn;  ie = nx-ninner
+        js = nn+1;     je = ny-nn
+        flag_dir = 1
+        call interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+        ! --- SOUTH
+        is = nn+1;     ie = nx-nn
+        js = ninner+1; je = nn+1
+        flag_dir = 2
+        call interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+        ! --- NORTH
+        is = nn+1;     ie = nx-nn
+        js = ny-nn;  je = ny-ninner
+        flag_dir = 2
+        call interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+        ! --- upper left
+        is = ninner+1; ie = nn+1
+        js = ninner+1; je = nn+1
+        flag_dir = 3
+        call interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+        ! --- upper right
+        is = nx-nn+1;  ie = nx-ninner
+        js = ninner+1; je = nn+1
+        flag_dir = 4
+        call interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+        ! --- lower left
+        is = ninner+1; ie = nn+1
+        js = ny-nn+1; je = ny-ninner
+        flag_dir = 5
+        call interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+        ! --- lower right
+        is = nx-nn+1;  ie = nx-ninner
+        js = ny-nn; je = ny-ninner
+        flag_dir = 6
+        call interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+        !------------------------------------------------------------
+
+    end subroutine interp2
+
+    subroutine interp2_data(array,x,y,is,js,ie,je,nx,ny,flag_dir)
+
+        implicit none
+        integer, intent(in) :: is,js,ie,je,nx,ny,flag_dir
+        integer :: i, j
+        real(kind=4), intent(in out) :: array(nx,ny)    
+        real(kind=4), intent(in out) :: x(nx),y(ny)
+        real(kind=4) :: S,v11,v12,v21,v22,x1,x2,y1,y2
+        real(kind=4) :: b11,b12,b21,b22
+        real(kind=4) :: v1,v2,b1,b2
+
+        x1 = x(is);y1 = y(js)
+        x2 = x(ie);y2 = y(je)
+        
+        if(flag_dir==1)then
+
+            do j = js,je
+                v1 = array(is,j); v2 = array(ie,j)
+                do i = is,ie
+                    b1 = (x2-x(i))/(x2-x1); b2 = (x(i)-x1)/(x2-x1)
+                    array(i,j) = v1*b1+v2*b2
+                enddo
+            enddo
+
+        elseif(flag_dir==2)then
+
+            do i = is,ie
+                v1 = array(i,js); v2 = array(i,je)
+                do j = js,je
+                    b1 = (y2-y(j))/(y2-y1); b2 = (y(j)-y1)/(y2-y1)
+                    array(i,j) = v1*b1+v2*b2
+                enddo
+            enddo
+
+        elseif(flag_dir>=3)then
+
+            if(flag_dir==3)then
+            v11 = array(is,js);v12 = array(is,je)
+            v21 = array(ie,js);v22 = array(ie,je)
+            elseif(flag_dir==4)then
+            v11 = array(ie,js);v12 = array(ie,je)
+            v21 = array(is,je);v22 = array(is,js)
+            elseif(flag_dir==5)then
+            v11 = array(ie,je);v12 = array(ie,js)
+            v21 = array(is,je);v22 = array(is,js)
+            elseif(flag_dir==6)then
+            v11 = array(is,js);v12 = array(is,je)
+            v21 = array(ie,je);v22 = array(ie,js)
+            endif
+
+
+            x1 = x(is);y1 = y(js)
+            x2 = x(ie);y2 = y(je)
+            S  = (x2-x1)*(y2-y1)
+
+
+        do i = is,ie
+            do j = js,je
+                b11 = (x2-x(i))*(y2-y(j))/S
+                b12 = (x(i)-x1)*(y2-y(j))/S
+                b21 = (x2-x(i))*(y(j)-y1)/S
+                b22 = (x(i)-x1)*(y(j)-y1)/S
+                array(i,j) = v11 * b11 + v12 * b12 &
+                           + v21 * b21 + v22 * b22 
+            enddo
+        enddo
+
+    endif
+
+    end subroutine interp2_data
 
     ! ==========================================================================
     !  read_wrf_storm_data()
@@ -857,9 +1099,10 @@ contains
         if (DEBUG) print *,"loading new storm snapshot ",&
                         "t=",t,"old t_next=",storm%t_next
 
-        print *, "flag = ",storm%storm_specification_type!flag_input_wrf
-        print *, "it = ",it, " ifile_nc = ",ifile_nc
-        print *, "yymmddhhnn = ", yy ,mm, dd, hh, nn
+        ! For debug only
+        ! print *, "flag = ",storm%storm_specification_type!flag_input_wrf
+        ! print *, "it = ",it, " ifile_nc = ",ifile_nc
+        ! print *, "yymmddhhnn = ", yy ,mm, dd, hh, nn
         if (storm%storm_specification_type==-1)then
             call read_wrf_storm(storm,t)
         elseif (storm%storm_specification_type==-2)then
