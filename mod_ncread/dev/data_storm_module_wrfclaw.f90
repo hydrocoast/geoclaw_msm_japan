@@ -30,7 +30,7 @@ module data_storm_module
 	real(kind=8), parameter :: eps = 1.0e-8 
 
     ! List of storm files (only netCDF input)
-    character(len=100),allocatable :: ncfilelist(:)
+    character(len=1024),allocatable :: ncfilelist(:)
 
     ! Pointer for reading nc files (only netCDF input)
     integer :: ifile_nc 
@@ -442,7 +442,7 @@ contains
         ! integer, intent(in out) :: yy, mm, dd, hh, nn
         ! integer, intent(in out) :: it          ! time step
         ! integer, intent(in out) :: ifile_nc    ! file ID to be read
-        ! character(len=100), intent(in) :: ncfilelist(:)
+        ! character(len=1024), intent(in) :: ncfilelist(:)
 
         ! Reading buffer variables
         integer :: timestamp
