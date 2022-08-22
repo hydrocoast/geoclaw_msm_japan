@@ -135,7 +135,7 @@ def setrun(claw_pkg='geoclaw'):
     # The solution at initial time t0 is always written in addition.
 
     clawdata.output_style = 2
-    clawdata.tfinal = days2seconds(4)
+    clawdata.tfinal = days2seconds(3)
 
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:
@@ -413,11 +413,11 @@ def setgeo(rundata):
 
     # Refinement Criteria
     refine_data = rundata.refinement_data
-    refine_data.wave_tolerance = 0.2
+    refine_data.wave_tolerance = 0.5
     refine_data.speed_tolerance = 1.0 #[0.25, 0.50, 0.75, 1.00]
 
     refine_data.deep_depth = 3.0e3
-    refine_data.max_level_deep = 2
+    refine_data.max_level_deep = 1
     refine_data.variable_dt_refinement_ratios = True
 
     # == settopo.data values ==
