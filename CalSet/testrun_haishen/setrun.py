@@ -135,7 +135,7 @@ def setrun(claw_pkg='geoclaw'):
     # The solution at initial time t0 is always written in addition.
 
     clawdata.output_style = 2
-    clawdata.tfinal = days2seconds(5) + 3600.0
+    clawdata.tfinal = days2seconds(4)
 
     if clawdata.output_style==1:
         # Output nout frames at equally spaced times up to tfinal:

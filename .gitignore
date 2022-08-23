@@ -28,6 +28,8 @@
 *.log
 *.out
 *.mp4
+*.diff
+*.asc
 topo/
 _jld2/
 _mat/
@@ -36,12 +38,10 @@ _plots/
 tmp*
 gmt.*
 ._*
-.DS_Store
-xgeoclaw
 x*
-.vscode
-*.asc
-test2.f90
+log.*
+test*.f90
 .output
 .data
-log.txt
+.vscode
+.DS_Store

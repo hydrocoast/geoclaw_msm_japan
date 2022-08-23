@@ -462,6 +462,24 @@ contains
         real(kind=8) :: a1, a2, storm_dist
         
 
+        ! check if ifile_nc exists
+        if(ifile_nc>nfile_nc)then
+            
+            print *, "storm netCDF file does not exist ..."
+            print *, "Using clear skies."
+            storm%t_next = storm%t_next + 365*24*60
+            storm%u_next = 0
+            storm%v_next = 0
+            storm%p_next = ambient_pressure
+            storm%eye_next = [0,0]
+
+            ! Update number of storm snapshots read in
+            storm%last_storm_index = storm%last_storm_index + 1
+            if (DEBUG) print *, "last_storm_index=", storm%last_storm_index
+
+            return
+
+        endif
 
         ! netcdf filename  
         f_in = ncfilelist(ifile_nc)
@@ -639,7 +657,7 @@ contains
         endif
 
         ! reset loop counter
-        if(it==nt)then
+        if(it==nt+1)then
             if (DEBUG) print *, "EOF of netCDF file and proceed to next file ..."
             it = 1
             ifile_nc = ifile_nc + 1
