@@ -27,6 +27,7 @@
 *.data
 *.log
 *.out
+*.mp4
 *.diff
 *.asc
 topo/

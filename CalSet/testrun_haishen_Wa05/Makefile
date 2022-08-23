@@ -99,4 +99,19 @@ SOURCES = \
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
 
+# Plot and save using Julia 
+.PHONY: juliaplots juliasave converttomat juliaall matlabplots
+
+juliaplots:
+	julia setplot.jl
+juliasave:
+	julia setsave.jl
+converttomat:
+	julia setconvert.jl
+juliaall:
+	julia -e 'include("./setsave.jl"); include("./setplot.jl"); include("./setconvert.jl")'
+matlabplots:
+	matlab -nodesktop -r 'run setplot_fgmax.m; exit'
+
+
 ### DO NOT remove this line - make depends on it ###
