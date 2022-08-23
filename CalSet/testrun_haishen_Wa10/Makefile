@@ -32,7 +32,7 @@ NC_LINK_CMD += $(shell $(NF_CONFIG) --cflags)
 MPFLAG = -fopenmp
 NCFLAGS = -DNETCDF $(NC_LINK_CMD) 
 # Debugging & profiling options
-#DEBUG = 1# uncomment to debug
+DEBUG = 1# uncomment to debug
 #PROFILE = 1# uncomment for profiling
 #
 ifeq ($(DEBUG),1)
@@ -42,7 +42,7 @@ ifeq ($(DEBUG),1)
 	DFLAGS = -g -fbacktrace -fbounds-check -ffpe-trap=invalid,overflow,zero
     else ifeq ($(FC),ifort)
 	#DEBUG = -g -C -fpe0 -traceback -ftrapuv -warn all
-	DFLAGS = -g -C -fpe0 -traceback -nogen-interface
+	DFLAGS = -g -CB -fpe0 -traceback -nogen-interface
     endif
 else ifeq ($(PROFILE),1)
     LDFLAGS = -pg
@@ -100,7 +100,7 @@ SOURCES = \
 include $(CLAWMAKE)
 
 # Plot and save using Julia 
-.PHONY: juliaplots juliasave converttomat juliaall matlabplots
+.PHONY: juliaplots juliasave converttomat juliaall matlabplots msmget
 
 juliaplots:
 	julia setplot.jl
@@ -112,6 +112,8 @@ juliaall:
 	julia -e 'include("./setsave.jl"); include("./setplot.jl"); include("./setconvert.jl")'
 matlabplots:
 	matlab -nodesktop -r 'run setplot_fgmax.m; exit'
-
+# download GPV MSM data
+msmget:
+	chmod 755 ./sh/*.sh; ./sh/call_get_msmnc_daily.sh 
 
 ### DO NOT remove this line - make depends on it ###
