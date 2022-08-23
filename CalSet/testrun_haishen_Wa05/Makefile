@@ -100,7 +100,7 @@ SOURCES = \
 include $(CLAWMAKE)
 
 # Plot and save using Julia 
-.PHONY: juliaplots juliasave converttomat juliaall matlabplots
+.PHONY: juliaplots juliasave converttomat juliaall matlabplots msmget
 
 juliaplots:
 	julia setplot.jl
@@ -112,6 +112,8 @@ juliaall:
 	julia -e 'include("./setsave.jl"); include("./setplot.jl"); include("./setconvert.jl")'
 matlabplots:
 	matlab -nodesktop -r 'run setplot_fgmax.m; exit'
-
+# download GPV MSM data
+msmget:
+	chmod 755 ./sh/*.sh; ./sh/call_get_msmnc_daily.sh 
 
 ### DO NOT remove this line - make depends on it ###
