@@ -13,6 +13,7 @@
 *.gz
 *.bz
 *.xz
+*.mat
 *.nc
 *.nc.*
 *.grd
@@ -26,6 +27,10 @@
 *.data
 *.log
 *.out
+*.mp4
+*.diff
+*.asc
+topo/
 _jld2/
 _mat/
 _output/
@@ -33,8 +38,10 @@ _plots/
 tmp*
 gmt.*
 ._*
-.DS_Store
-xgeoclaw
 x*
+log.*
+test*.f90
 .output
 .data
+.vscode
+.DS_Store

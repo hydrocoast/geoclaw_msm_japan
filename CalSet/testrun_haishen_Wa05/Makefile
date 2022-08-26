@@ -22,21 +22,17 @@ PLOTDIR = _plots               # Directory for plots
 # NetCDF support
 # Environment variable NETCDF_F_ROOT should be set
 # to NetCDF Fortran installation
-#FC = $(shell nc-config --fc)
-NF_CONFIG = nf-config
+NF_CONFIG = $(NETCDF_F_ROOT)/bin/nf-config
 LIB_PATHS = $(shell $(NF_CONFIG) --prefix)/lib
-INCLUDE = $(shell $(NF_CONFIG) --includedir)
+INCLUDE = $(shell $(NF_CONFIG) --fflags)
 NC_LINK_CMD = $(shell $(NF_CONFIG) --flibs)
 NC_LINK_CMD += $(shell $(NF_CONFIG) --cflags)
-
-##
-SRC_EXT = .
 
 # Compiler flags
 MPFLAG = -fopenmp
 NCFLAGS = -DNETCDF $(NC_LINK_CMD) 
 # Debugging & profiling options
-#DEBUG = 1# uncomment to debug
+DEBUG = 1# uncomment to debug
 #PROFILE = 1# uncomment for profiling
 #
 ifeq ($(DEBUG),1)
@@ -46,14 +42,15 @@ ifeq ($(DEBUG),1)
 	DFLAGS = -g -fbacktrace -fbounds-check -ffpe-trap=invalid,overflow,zero
     else ifeq ($(FC),ifort)
 	#DEBUG = -g -C -fpe0 -traceback -ftrapuv -warn all
-	DFLAGS = -g -C -fpe0 -traceback -nogen-interface
+	DFLAGS = -g -CB -fpe0 -traceback -nogen-interface
     endif
 else ifeq ($(PROFILE),1)
     LDFLAGS = -pg
     DFLAGS = -pg -O2 -profile-functions -profile-loops=all -profile-loops-report=2
     MPFLAG = 
 else
-    DFLAGS = -O2
+    #DFLAGS = -O2
+    DFLAGS = -O3
 endif
 FFLAGS ?= $(MPFLAG) $(DFLAGS) $(NCFLAGS)
 LFLAGS ?= $(NC_LINK_CMD) $(MPFLAG) $(LDFLAGS)
@@ -78,6 +75,7 @@ EXCLUDE_MODULES = \
     $(GEOLIB)/multilayer/multilayer_module.f90 \
 
 EXCLUDE_SOURCES = \
+    $(AMRLIB)/outmsh.f \
 
 # ----------------------------------------
 # List of custom sources for this program:
@@ -86,8 +84,8 @@ EXCLUDE_SOURCES = \
 RIEMANN = $(CLAW)/riemann/src
 
 MODULES = \
-  $(SRC_EXT)/data_storm_module.f90 \
-  $(SRC_EXT)/storm_module.f90 \
+  ./mod/data_storm_module_wrfclaw.f90 \
+  ./mod/storm_module_wrfclaw.f90 \
   $(GEOLIB)/gauges_module.f90 \
   $(GEOLIB)/multilayer/multilayer_module.f90 \
 
@@ -95,14 +93,27 @@ SOURCES = \
   $(RIEMANN)/rpn2_geoclaw.f \
   $(RIEMANN)/rpt2_geoclaw.f \
   $(RIEMANN)/geoclaw_riemann_utils.f \
+  ./src/outmsh.f \
 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
 
-.PHONY: cleanext
+# Plot and save using Julia 
+.PHONY: juliaplots juliasave converttomat juliaall matlabplots msmget
 
-cleanext:
-	-rm -f $(SRC_EXT)/*.o $(SRC_EXT)/*.mod
+juliaplots:
+	julia setplot.jl
+juliasave:
+	julia setsave.jl
+converttomat:
+	julia setconvert.jl
+juliaall:
+	julia -e 'include("./setsave.jl"); include("./setplot.jl"); include("./setconvert.jl")'
+matlabplots:
+	matlab -nodesktop -r 'run setplot_fgmax.m; exit'
+# download GPV MSM data
+msmget:
+	chmod 755 ./sh/*.sh; ./sh/call_get_msmnc_daily.sh 
 
 ### DO NOT remove this line - make depends on it ###
