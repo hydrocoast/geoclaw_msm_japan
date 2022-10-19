@@ -25,12 +25,12 @@
 *.swt
 *.asv
 *.data
+*.dat
 *.log
 *.out
 *.mp4
 *.diff
 *.asc
-topo/
 _jld2/
 _mat/
 _output/
