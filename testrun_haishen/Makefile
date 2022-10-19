@@ -19,21 +19,18 @@ OUTDIR = _output               # Directory for output
 SETPLOT_FILE = setplot.py      # File containing function to set plots
 PLOTDIR = _plots               # Directory for plots
 
-# NetCDF support
-# Environment variable NETCDF_F_ROOT should be set
-# to NetCDF Fortran installation
-#NF_CONFIG = $(NETCDF_F_ROOT)/bin/nf-config
+# NetCDF Fortran support
+# set a fullpath of `nf-config` to NF_CONFIG or
+# set `nf-config` in your PATH
 NF_CONFIG := nf-config
-LIB_PATHS = $(shell $(NF_CONFIG) --prefix)/lib
-INCLUDE = $(shell $(NF_CONFIG) --fflags)
-NC_LINK_CMD = $(shell $(NF_CONFIG) --flibs)
-NC_LINK_CMD += $(shell $(NF_CONFIG) --cflags)
+NCFLAGS := $(shell $(NF_CONFIG) --cflags) -DNETCDF
+NC_LINK_CMD := $(shell $(NF_CONFIG) --flibs)
+
 
 # Compiler flags
 MPFLAG = -fopenmp
-NCFLAGS = -DNETCDF $(NC_LINK_CMD) 
 # Debugging & profiling options
-DEBUG = 1# uncomment to debug
+#DEBUG = 1# uncomment to debug
 #PROFILE = 1# uncomment for profiling
 #
 ifeq ($(DEBUG),1)
@@ -50,11 +47,11 @@ else ifeq ($(PROFILE),1)
     DFLAGS = -pg -O2 -profile-functions -profile-loops=all -profile-loops-report=2
     MPFLAG = 
 else
-    #DFLAGS = -O2
-    DFLAGS = -O3
+    DFLAGS = -O2
+    #DFLAGS = -O3
 endif
-FFLAGS ?= $(MPFLAG) $(DFLAGS) $(NCFLAGS)
-LFLAGS ?= $(NC_LINK_CMD) $(MPFLAG) $(LDFLAGS)
+FFLAGS += $(MPFLAG) $(DFLAGS) $(NCFLAGS)
+LFLAGS += $(NC_LINK_CMD) $(MPFLAG) $(LDFLAGS)
 FFLAGS += -fallow-argument-mismatch
 
 # ---------------------------------
@@ -116,6 +113,6 @@ matlabplots:
 	matlab -nodesktop -r 'run setplot_fgmax.m; exit'
 # download GPV MSM data
 msmget:
-	chmod 755 ./sh/*.sh; ./sh/call_get_msmnc_daily.sh 
+	./get_msmnc_haishen.sh 
 
 ### DO NOT remove this line - make depends on it ###

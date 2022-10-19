@@ -13,7 +13,7 @@ do
     if [ -e $FILE ]; then
         echo "File exists... skip"
     else
-        ./sh/get_msmnc_daily.sh ${yearList[i]} ${dateList[i]}
+        ./get_msmnc_daily.sh ${yearList[i]} ${dateList[i]}
     fi
 done
 
