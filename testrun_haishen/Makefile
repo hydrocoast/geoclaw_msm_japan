@@ -22,8 +22,8 @@ PLOTDIR = _plots               # Directory for plots
 # NetCDF support
 # Environment variable NETCDF_F_ROOT should be set
 # to NetCDF Fortran installation
-#NETCDF_F_ROOT ?= /usr/local/Cellar/netcdf/4.8.1
-NF_CONFIG = nf-config
+#NF_CONFIG = $(NETCDF_F_ROOT)/bin/nf-config
+NF_CONFIG := nf-config
 LIB_PATHS = $(shell $(NF_CONFIG) --prefix)/lib
 INCLUDE = $(shell $(NF_CONFIG) --fflags)
 NC_LINK_CMD = $(shell $(NF_CONFIG) --flibs)
@@ -33,7 +33,7 @@ NC_LINK_CMD += $(shell $(NF_CONFIG) --cflags)
 MPFLAG = -fopenmp
 NCFLAGS = -DNETCDF $(NC_LINK_CMD) 
 # Debugging & profiling options
-#DEBUG = 1# uncomment to debug
+DEBUG = 1# uncomment to debug
 #PROFILE = 1# uncomment for profiling
 #
 ifeq ($(DEBUG),1)
@@ -43,17 +43,19 @@ ifeq ($(DEBUG),1)
 	DFLAGS = -g -fbacktrace -fbounds-check -ffpe-trap=invalid,overflow,zero
     else ifeq ($(FC),ifort)
 	#DEBUG = -g -C -fpe0 -traceback -ftrapuv -warn all
-	DFLAGS = -g -C -fpe0 -traceback -nogen-interface
+	DFLAGS = -g -CB -fpe0 -traceback -nogen-interface
     endif
 else ifeq ($(PROFILE),1)
     LDFLAGS = -pg
     DFLAGS = -pg -O2 -profile-functions -profile-loops=all -profile-loops-report=2
     MPFLAG = 
 else
-    DFLAGS = -O2
+    #DFLAGS = -O2
+    DFLAGS = -O3
 endif
 FFLAGS ?= $(MPFLAG) $(DFLAGS) $(NCFLAGS)
 LFLAGS ?= $(NC_LINK_CMD) $(MPFLAG) $(LDFLAGS)
+FFLAGS += -fallow-argument-mismatch
 
 # ---------------------------------
 # package sources for this program:
@@ -99,8 +101,8 @@ SOURCES = \
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
 
-# Plot and save using Julia
-.PHONY: juliaplots juliasave converttomat juliaall matlabplots
+# Plot and save using Julia 
+.PHONY: juliaplots juliasave converttomat juliaall matlabplots msmget
 
 juliaplots:
 	julia setplot.jl
@@ -112,5 +114,8 @@ juliaall:
 	julia -e 'include("./setsave.jl"); include("./setplot.jl"); include("./setconvert.jl")'
 matlabplots:
 	matlab -nodesktop -r 'run setplot_fgmax.m; exit'
+# download GPV MSM data
+msmget:
+	chmod 755 ./sh/*.sh; ./sh/call_get_msmnc_daily.sh 
 
 ### DO NOT remove this line - make depends on it ###

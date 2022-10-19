@@ -1,1 +1,0 @@
-../sh_run/runclaw.sh
