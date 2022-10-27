@@ -5,8 +5,8 @@ if [ -z "$2" ]; then
 fi
 
 rsync -av "$1/" "$2/" --exclude="_output*/" --exclude="_plots/" --exclude="_jld2/" --exclude="*.data" \
-	              --exclude=".*" --exclude="*.swp" \
+	              --exclude=".*" --exclude="*.swp" --exclude="*.mat" \
 		      --exclude="*.kml" --exclude="*.log" \
-		      --exclude="xgeoclaw" \
+		      --exclude="xgeoclaw" --exclude="*.out" \
 		      --exclude="*.mod" \
 		      --exclude="*.o" --exclude="*.html"
