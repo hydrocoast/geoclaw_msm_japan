@@ -5,6 +5,7 @@ yearList=( 2020 2020 2020 2020 )
 dateList=( 0904 0905 0906 0907 )
 ndays=${#dateList[*]} # number of days
 ie=$(($ndays-1))
+#time_interval=86400
 
 for i in `seq 0 ${ie}` 
 do

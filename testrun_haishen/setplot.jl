@@ -48,8 +48,9 @@ else
 end
 savefig(plt, joinpath(plotdir,"topo.svg"))
 print("end\n")
+=#
 
-
+#=
 ## load track
 print("loading track ...     ")
 if isfile(joinpath(jld2dir, "track.jld2"))
@@ -59,7 +60,7 @@ else
 end
 converttodatetime!(track, t0_datetime)
 print("end\n")
-
+=#
 
 ## load surface
 print("loading eta ...     ")
@@ -77,12 +78,11 @@ print("end\n")
 
 ## plot eta
 print("plotting eta ...     ")
-plts = plotsamr(amrall; clims=(-1.0,1.0), c=:bwr, colorbar=true)
+plts = plotsamr(amrall; clims=(-0.5,0.5), c=:bwr, colorbar=true)
 plts = map((p,s)->plot!(p; title=s), plts, tstr)
-plts = map((p,k)->plotstrack!(p, track, 1:k; lc=:black), plts, 1:amrall.nstep)
+#plts = map((p,k)->plotstrack!(p, track, 1:k; lc=:black), plts, 1:amrall.nstep)
 map((p,k)->savefig(p, joinpath(plotdir,"surf_"*@sprintf("%03d",k)*".png")), plts, 1:amrall.nstep)
 print("end\n")
-=#
 #=
 ## save eta
 print("saving eta as a gif ...     ")

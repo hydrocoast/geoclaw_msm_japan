@@ -108,7 +108,7 @@ contains
 
         ! Subroutine I/O
         character(len=*), optional :: storm_data_path
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
         integer, intent(in) :: storm_spec_type, log_unit
 
         ! Local storage
@@ -132,6 +132,7 @@ contains
         ! Counter variable
         ! integer :: it
         ! integer :: yy, mm, dd, hh, nn
+
 
         
 
@@ -157,68 +158,7 @@ contains
 
         storm%storm_specification_type = storm_spec_type
 
-        if (storm%storm_specification_type == -1) then
-
-            ! Monitor output
-            print *, "storm data format =====> *.swt"
-
-            storm_data_path = trim(storm%data_path) // "1d.con"
-            print *,'Reading storm config data file ',trim(storm_data_path)
-            open(unit=l_file,file=storm_data_path,status='old', &
-                    action='read',iostat=iostatus)
-            if (iostatus /= 0) then
-                print *, "Error opening SuWAT config data file. status = ", iostatus
-                stop 
-            endif            
-
-            ! Read config file for num_lons, num_lats
-            ! Line 1 
-            read(l_file, *, iostat=iostatus) storm%num_lons, storm%num_lats
-
-            ! Allocate memory for lat & lon coords and u/v/p fields
-            allocate(storm%u_prev(storm%num_lons,storm%num_lats))
-            allocate(storm%v_prev(storm%num_lons,storm%num_lats))
-            allocate(storm%p_prev(storm%num_lons,storm%num_lats))
-            allocate(storm%u_next(storm%num_lons,storm%num_lats))
-            allocate(storm%v_next(storm%num_lons,storm%num_lats))
-            allocate(storm%p_next(storm%num_lons,storm%num_lats))
-            allocate(storm%u(storm%num_lons,storm%num_lats))
-            allocate(storm%v(storm%num_lons,storm%num_lats))
-            allocate(storm%p(storm%num_lons,storm%num_lats))
-
-            ! Line 2, lower left corner and dy
-            read(l_file, *, iostat=iostatus) storm%ll_lon, storm%ll_lat, storm%dy
-            ! Line 3, upper right corner and dx
-            read(l_file, *, iostat=iostatus) storm%ur_lon, storm%ur_lat, storm%dx
-            close(l_file)
-
-
-            ! This is used to speed up searching for correct storm data
-            !  (using ASCII datafiles)
-            storm%last_storm_index = 0
-
-            ! Read in the first storm data snapshot as 'next'
-            !  and increment storm%last_storm_index to 1
-            call read_wrf_storm(storm,t0)
-
-            ! Check if starting time of simulation
-            !  is before the first storm data snapshot
-            if (t0 < storm%t_next - eps) then
-                print *, "Simulation start time precedes storm data. Using clear skies."
-                if (DEBUG) print *, "t0=", t0, "first storm t:",storm%t_next
-                storm%t_prev = t0
-                storm%u_prev = 0
-                storm%v_prev = 0
-                storm%p_prev = ambient_pressure
-                storm%eye_prev = storm%eye_next
-            else
-                ! Read in the second storm data snapshot as 'next',
-                !  update 'prev' with old 'next' data,
-                !  and increment storm%last_storm_index to 2
-                call read_wrf_storm(storm,t0)
-            endif
-
-        elseif (storm%storm_specification_type == -2) then
+        if (storm%storm_specification_type == -2) then
 
             ! Monitor output
             print *, "storm data format =====> *.nc"
@@ -359,7 +299,7 @@ contains
         implicit none
 
         ! Subroutine I/O
-        real(kind=8), intent(in out) :: storm_array(:,:)
+        real(kind=8), intent(inout) :: storm_array(:,:)
         character(len=*), intent(in) :: data_path
         integer, intent(in) :: num_lats, last_storm_index
         integer, intent(inout) :: timestamp
@@ -436,12 +376,12 @@ contains
         implicit none
 
         ! Subroutine I/O
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
         real(kind=8) :: lowest_p
         real(kind=8), intent(in) :: t
-        ! integer, intent(in out) :: yy, mm, dd, hh, nn
-        ! integer, intent(in out) :: it          ! time step
-        ! integer, intent(in out) :: ifile_nc    ! file ID to be read
+        ! integer, intent(inout) :: yy, mm, dd, hh, nn
+        ! integer, intent(inout) :: it          ! time step
+        ! integer, intent(inout) :: ifile_nc    ! file ID to be read
         ! character(len=1024), intent(in) :: ncfilelist(:)
 
         ! Reading buffer variables
@@ -681,13 +621,13 @@ contains
         implicit none
 
         ! storm field (pressure or wind)
-        type(data_storm_type), intent(in out) :: storm
-        integer, intent(in out) :: nx, ny
-        real(kind=4), intent(in out) :: storm_field(nx,ny)
+        type(data_storm_type), intent(inout) :: storm
+        integer, intent(inout) :: nx, ny
+        real(kind=4), intent(inout) :: storm_field(nx,ny)
         real(kind=4) :: storm_field_wrk(nx,ny)
 
         ! coordinate
-        real(kind=4), intent(in out) :: x(nx),y(ny)
+        real(kind=4), intent(inout) :: x(nx),y(ny)
 
         ! flag determining pressure (1) or wind (2)
         integer :: flag
@@ -773,8 +713,8 @@ contains
 
         integer, intent(in) :: nn, ninner, nbuffer, nx, ny
         integer :: is,ie,js,je,flag_dir
-        real(kind=4), intent(in out) :: array(nx,ny)    
-        real(kind=4), intent(in out) :: x(nx),y(ny)
+        real(kind=4), intent(inout) :: array(nx,ny)    
+        real(kind=4), intent(inout) :: x(nx),y(ny)
 
         ! linear interpolation in buffer layer
         !----------------------------------------------------------
@@ -827,8 +767,8 @@ contains
         implicit none
         integer, intent(in) :: is,js,ie,je,nx,ny,flag_dir
         integer :: i, j
-        real(kind=4), intent(in out) :: array(nx,ny)    
-        real(kind=4), intent(in out) :: x(nx),y(ny)
+        real(kind=4), intent(inout) :: array(nx,ny)    
+        real(kind=4), intent(inout) :: x(nx),y(ny)
         real(kind=4) :: S,v11,v12,v21,v22,x1,x2,y1,y2
         real(kind=4) :: b11,b12,b21,b22
         real(kind=4) :: v1,v2,b1,b2
@@ -894,84 +834,6 @@ contains
     end subroutine interp2_data
 
     ! ==========================================================================
-    !  read_wrf_storm_data()
-    !    Reads storm fields for next time snapshot
-    !    Currently only for ASCII files
-    ! ==========================================================================
-
-    subroutine read_wrf_storm(storm,t)
-
-        use geoclaw_module, only: ambient_pressure
-
-        implicit none
-
-        ! Subroutine I/O
-        type(data_storm_type), intent(in out) :: storm
-        real(kind=8), intent(in) :: t
-
-        ! Local storage
-        character(len=4096) :: data_path
-        real(kind=8) :: lowest_p
-
-        ! Reading buffer variables
-        integer :: timestamp
-
-        ! Overwrite older storm states with newer storm states
-        storm%t_prev = storm%t_next
-        storm%u_prev = storm%u_next 
-        storm%v_prev = storm%v_next 
-        storm%p_prev = storm%p_next 
-        storm%eye_prev = storm%eye_next
-        
-        ! Current time t currently unused in favor of storm%last_storm_index.
-        ! This should probably be changed in the future.
-
-        ! Read the u-velocity file
-        data_path = trim(storm%data_path) // "u10_d01.swt"
-        call read_wrf_storm_file(data_path,storm%u_next,storm%num_lats,storm%last_storm_index,timestamp)
-        ! Error handling: set to clear skies if file ended
-        if (timestamp == -1) then
-            storm%u_next = 0
-            storm%t_next = storm%t_next + 365*24*60
-        else
-            ! Save timestamp (sec) of next snapshot
-            storm%t_next = timestamp
-        endif
-
-        ! Read v-velocity file
-        data_path = trim(storm%data_path) // "v10_d01.swt"
-        call read_wrf_storm_file(data_path,storm%v_next,storm%num_lats,storm%last_storm_index,timestamp)
-        ! Error handling: set to clear skies if file ended
-        if (timestamp == -1) then
-            storm%v_next = 0
-        endif
-
-        ! Read pressure file
-        data_path = trim(storm%data_path) // "slp_d01.swt"
-        call read_wrf_storm_file(data_path,storm%p_next,storm%num_lats,storm%last_storm_index,timestamp)
-        ! Error handling: set to clear skies if file ended
-        if (timestamp == -1) then
-            storm%p_next = ambient_pressure
-            storm%eye_next = [0,0]
-        else
-            ! Convert pressure units: mbar to Pa
-            storm%p_next = storm%p_next * 1.0e2
-            ! Estimate storm center location based on lowest pressure
-            ! (only the array index is saved)
-            storm%eye_next = MINLOC(storm%p_next)
-            ! If no obvious low pressure area, set storm center to 0 instead
-            lowest_p = storm%p_next(storm%eye_next(1),storm%eye_next(2))
-            if (lowest_p > ambient_pressure*0.99) then
-                storm%eye_next = [0,0]
-            endif
-        endif
-
-        ! Update number of storm snapshots read in
-        storm%last_storm_index = storm%last_storm_index + 1
-        if (DEBUG) print *, "last_storm_index=", storm%last_storm_index
-
-    end subroutine read_wrf_storm
-    ! ==========================================================================
     !  storm_location(t,storm)
     !    Interpolate location of hurricane in the current time interval
     ! ==========================================================================
@@ -983,7 +845,7 @@ contains
 
         ! Input
         real(kind=8), intent(in) :: t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Output
         real(kind=8) :: location(2)
@@ -1058,9 +920,9 @@ contains
         integer, intent(in) :: maux,mbc,mx,my
         real(kind=8), intent(in) :: xlower,ylower,dx,dy,t
 
-        ! Storm description, need in out here since we may update the storm
+        ! Storm description, need inout here since we may update the storm
         ! if at next time point
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Array storing wind and presure field
         integer, intent(in) :: wind_index, pressure_index
@@ -1093,9 +955,9 @@ contains
         integer, intent(in) :: maux,mbc,mx,my
         real(kind=8), intent(in) :: xlower,ylower,dx,dy,t
 
-        ! Storm description, need in out here since we may update the storm
+        ! Storm description, need inout here since we may update the storm
         ! if at next time point
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Array storing wind and presure field
         integer, intent(in) :: wind_index, pressure_index
@@ -1125,11 +987,13 @@ contains
         ! print *, "flag = ",storm%storm_specification_type!flag_input_wrf
         ! print *, "it = ",it, " ifile_nc = ",ifile_nc
         ! print *, "yymmddhhnn = ", yy ,mm, dd, hh, nn
-        if (storm%storm_specification_type==-1)then
-            call read_wrf_storm(storm,t)
-        elseif (storm%storm_specification_type==-2)then
-            call read_wrf_storm_nc( storm, t )
-        endif
+        !if (storm%storm_specification_type==-1)then
+        !    call read_wrf_storm(storm,t)
+        !elseif (storm%storm_specification_type==-2)then
+        !    call read_wrf_storm_nc( storm, t )
+        !endif
+        call read_wrf_storm_nc( storm, t )
+
         if (DEBUG) print *,"new t_next=",storm%t_next
         ! If storm data ends, the final storm state is used.
         enddo
@@ -1267,9 +1131,9 @@ contains
 
         implicit none
 
-        ! Storm description, need "in out" here since will update the storm
+        ! Storm description, need "inout" here since will update the storm
         ! values at time t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Check if there are distinct storm "eyes"
         ! If not, interpolate wind & pressure fields in place.
@@ -1294,9 +1158,9 @@ contains
 
         implicit none
 
-        ! Storm description, need "in out" here since will update the storm
+        ! Storm description, need "inout" here since will update the storm
         ! values at time t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Local storage
         real(kind=8) :: alpha
@@ -1331,9 +1195,9 @@ contains
 
         implicit none
 
-        ! Storm description, need "in out" here since will update the storm
+        ! Storm description, need "inout" here since will update the storm
         ! values at time t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Local storage
         real(kind=8) :: alpha
@@ -1384,9 +1248,9 @@ contains
 
         implicit none
 
-        ! Storm description, need "in out" here since will update the storm
+        ! Storm description, need "inout" here since will update the storm
         ! values at time t
-        type(data_storm_type), intent(in out) :: storm
+        type(data_storm_type), intent(inout) :: storm
 
         ! Local storage
         real(kind=8) :: alpha
