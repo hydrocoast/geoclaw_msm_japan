@@ -23,11 +23,11 @@ module data_storm_module
     logical, private :: module_setup = .false.
 
     ! Internal tracking variables for storm
-	logical, private :: DEBUG = .true. 
+    logical, private :: DEBUG = .true. 
     !logical, private :: DEBUG = .false. 
 
     ! Tolerance for floating point inequalities
-	real(kind=8), parameter :: eps = 1.0e-8 
+    real(kind=8), parameter :: eps = 1.0e-8 
 
     ! List of storm files (only netCDF input)
     character(len=1024),allocatable :: ncfilelist(:)
